@@ -32,7 +32,7 @@ function pageScript(extId) {
     (() => {
       const attachInterval = setInterval(() => {
         try {
-          const app = window.wrappedJSObject.debugApp;
+          const app = window.debugApp;
           if (!app) return;
 
           clearInterval(attachInterval);
@@ -45,7 +45,7 @@ function pageScript(extId) {
       setTimeout(() => clearInterval(attachInterval), 5 * 60 * 1000); // stop trying after 5 minutes
 
       function updateScores() {
-        const app = window.wrappedJSObject.debugApp;
+        const app = window.debugApp;
         if (!app) return;
 
         const points = app.pointTypes.map((point) => ({
