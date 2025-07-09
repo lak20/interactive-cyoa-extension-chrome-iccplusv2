@@ -1,7 +1,7 @@
 const pointsContainer = document.getElementById('points-container');
 const actionsContainer = document.getElementById('actions-container');
 
-chrome.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const tab = await getCurrentTab();
 
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
@@ -35,11 +35,10 @@ function updatePoints(points) {
         try {
           const value = parseFloat(valueElem.value);
           getCurrentTab().then((tab) => {
-            chrome.scripting.executeScript({
+            browser.scripting.executeScript({
               target: { tabId: tab.id },
               func: updatePoint,
-              args: [index, value],
-              world: chrome.scripting.ExecutionWorld.MAIN
+              args: [index, value]
             });
           });
         } catch(e) {}
@@ -67,7 +66,7 @@ function updatePoints(points) {
 function updatePoint(index, value) {
   try {
     (() => {
-      const app = document.querySelector('#app').__vue__.$store.state.app;
+      const app = window.wrappedJSObject.debugApp;
 
       app.pointTypes[index].startingSum = value;
     })()
@@ -76,10 +75,9 @@ function updatePoint(index, value) {
 
 document.getElementById('remove-row-limits-button').onclick = async () => {
   try {
-    await chrome.scripting.executeScript({
+    await browser.scripting.executeScript({
       target: { tabId: (await getCurrentTab()).id },
-      func: removeRowLimits,
-      world: chrome.scripting.ExecutionWorld.MAIN
+      func: removeRowLimits
     });
   } catch(e) {}
 };
@@ -87,15 +85,15 @@ document.getElementById('remove-row-limits-button').onclick = async () => {
 function removeRowLimits() {
   try {
     (() => {
-      const app = document.querySelector('#app').__vue__.$store.state.app;
+      const app = window.wrappedJSObject.debugApp;
     
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
       }
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
-          row.objects.forEach((row) => allObjects(row, func));
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
         }
       }
       allThings((obj) => obj.allowedChoices = 0);
@@ -105,10 +103,9 @@ function removeRowLimits() {
 
 document.getElementById('remove-randomness-button').onclick = async () => {
   try {
-    await chrome.scripting.executeScript({
+    await browser.scripting.executeScript({
       target: { tabId: (await getCurrentTab()).id },
-      func: removeRandomness,
-      world: chrome.scripting.ExecutionWorld.MAIN
+      func: removeRandomness
     });
   } catch(e) {}
 };
@@ -116,15 +113,15 @@ document.getElementById('remove-randomness-button').onclick = async () => {
 function removeRandomness() {
   try {
     (() => {
-      const app = document.querySelector('#app').__vue__.$store.state.app;
+      const app = window.wrappedJSObject.debugApp;
     
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
       }
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
-          row.objects.forEach((row) => allObjects(row, func));
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
         }
       }
       allThings((obj) => obj.isInfoRow && (obj.isInfoRow = false));
@@ -134,10 +131,9 @@ function removeRandomness() {
 
 document.getElementById('remove-requirements-button').onclick = async () => {
   try {
-    await chrome.scripting.executeScript({
+    await browser.scripting.executeScript({
       target: { tabId: (await getCurrentTab()).id },
-      func: removeRequirements,
-      world: chrome.scripting.ExecutionWorld.MAIN
+      func: removeRequirements
     });
   } catch (e) {}
 };
@@ -145,18 +141,18 @@ document.getElementById('remove-requirements-button').onclick = async () => {
 function removeRequirements() {
   try {
     (() => {
-      const app = document.querySelector('#app').__vue__.$store.state.app;
-
+      const app = window.wrappedJSObject.debugApp;
+    
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
       }
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
-          row.objects.forEach((row) => allObjects(row, func));
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
         }
       }
-      allThings((obj) => obj.requireds ? obj.requireds = [] : undefined);
+      allThings((obj) => obj.requireds.length = 0);
     })();
   } catch (e) {}
 }
@@ -164,6 +160,6 @@ function removeRequirements() {
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
+  let [tab] = await browser.tabs.query(queryOptions);
   return tab;
 }
