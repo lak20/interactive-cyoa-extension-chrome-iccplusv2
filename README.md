@@ -5,7 +5,7 @@ With this you can give yourself as many points as you want, and you can remove s
 
 The chrome extension can be found on the Chrome Web Store: probably never, Im not paying 5$ for a developer account.
 There is a not signed version of the extension in releases that you should be able to install
-Chrome version requires you to turn on developer mode in the extensions tab first. Then you download the .crx file and Drag & Drop it onto chrome.
+Chrome version requires you to turn on developer mode in the extensions tab first. Then you download the .zip file extract it into a folder(can be named anything and placed in any reasonable place (don't put it into win32 please)). Then in the extension tab press Load unpacked and select the folder that you extracted it into.
 
 The firefox extension is currently not allowed on the Mozilla webstore because of the small target audience.
 Firefox release has been created and signed by mozzila you can "install" it by clicking on firefox version on the right side of the screen and the under Assets click the file ending with .xpi.
