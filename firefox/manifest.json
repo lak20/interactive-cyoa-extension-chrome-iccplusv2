@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Interactive CYOA assist tool",
-  "version": "1.0.3",
+  "name": "Interactive CYOA assist tool for icc+v2",
+  "version": "0.0.1",
   "browser_specific_settings": {
     "gecko": {
-      "id": "interactiveassisttool@cyoa",
-      "update_url": "https://raw.githubusercontent.com/peteresculley/interactive-cyoa-extension-chrome/master/firefox/updates.json"
+      "id": "interactiveassisttool@cyoa"
     }
   },
 
@@ -31,6 +30,6 @@
     "matches": ["*"]
   },
   "description": "A tool to assist filling out interactive CYOAs made with the Interactive CYOA creator",
-  "author": "psculley3@gmail.com",
-  "short_name": "CYOA tool"
+  "author": "lak20",
+  "short_name": "CYOA tool svelte"
 }
