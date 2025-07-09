@@ -32,7 +32,7 @@ function pageScript(extId) {
     (() => {
       const attachInterval = setInterval(() => {
         try {
-          const app = document.querySelector('#app').__vue__.$store.state.app;
+          const app = window.wrappedJSObject.debugApp;
           if (!app) return;
 
           clearInterval(attachInterval);
@@ -45,7 +45,7 @@ function pageScript(extId) {
       setTimeout(() => clearInterval(attachInterval), 5 * 60 * 1000); // stop trying after 5 minutes
 
       function updateScores() {
-        const app = document.querySelector('#app').__vue__.$store.state.app;
+        const app = window.wrappedJSObject.debugApp;
         if (!app) return;
 
         const points = app.pointTypes.map((point) => ({
