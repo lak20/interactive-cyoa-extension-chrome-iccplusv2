@@ -3,7 +3,7 @@ This is a minimum effort fork of the original modified to work with icc+v2 avail
 Browser extension for use with Interactive CYOAs.
 With this you can give yourself as many points as you want, and you can remove some other kinds of restrictions that CYOAs place upon you.
 
-The chrome extension can be found on the Chrome Web Store: probably never, Im not paying 5$ for a developer account
+The chrome extension can be found on the Chrome Web Store: probably never, Im not paying 5$ for a developer account.
 There is a not signed version of the extension in releases that you should be able to install
 Chrome version requires you to turn on developer mode in the extensions tab first. Then you download the .crx file and Drag & Drop it onto chrome.
 
