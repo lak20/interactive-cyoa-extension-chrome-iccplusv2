@@ -2,7 +2,7 @@ try {
   (() => {
     const attachInterval = setInterval(() => {
       try {
-        const app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app;
+        const app = window.wrappedJSObject.debugApp;;
         if (!app) return;
 
         clearInterval(attachInterval);
@@ -15,7 +15,7 @@ try {
     setTimeout(() => clearInterval(attachInterval), 5 * 60 * 1000); // stop trying after 5 minutes
 
     function updateScores() {
-      const app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app;
+      const app = window.wrappedJSObject.debugApp;;
       if (!app) return;
 
       const points = Array.prototype.map.call(app.pointTypes, (point) => ({
