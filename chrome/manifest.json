@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Interactive CYOA assist tool",
-  "version": "1.1.2",
+  "name": "Interactive CYOA assist tool for icc+v2",
+  "version": "0.0.3.4",
 
   "action": {
     "default_icon": {
@@ -20,6 +20,6 @@
     "matches": ["<all_urls>"]
   },
   "description": "A tool to assist filling out interactive CYOAs made with the Interactive CYOA creator",
-  "author": "psculley3@gmail.com",
-  "short_name": "CYOA tool"
+  "author": "lak20",
+  "short_name": "CYOA tool svelte"
 }
