@@ -1,14 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Interactive CYOA assist tool",
-  "version": "1.1.2",
+  "name": "Interactive CYOA assist tool for icc+v2",
+  "version": "0.0.3.4",
   "browser_specific_settings": {
     "gecko": {
-      "id": "interactiveassisttool@cyoa",
-      "update_url": "https://raw.githubusercontent.com/peteresculley/interactive-cyoa-extension-chrome/master/firefox/updates.json"
+      "id": "interactiveassisttoolsvelte@cyoa"
     }
   },
-
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
@@ -17,21 +15,37 @@
     },
     "default_popup": "action/action.html"
   },
-  "permissions": ["scripting"],
-  "host_permissions": ["<all_urls>"],
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": ["content/content-script.js"],
-    "all_frames": true
-  }],
+  "permissions": [
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/content-script.js"
+      ],
+      "all_frames": true
+    }
+  ],
   "background": {
-    "scripts": ["background/service-worker.js"]
+    "scripts": [
+      "background/service-worker.js"
+    ]
   },
   "externally_connectable": {
-    "ids": ["*"],
-    "matches": ["*"]
+    "ids": [
+      "*"
+    ],
+    "matches": [
+      "*"
+    ]
   },
   "description": "A tool to assist filling out interactive CYOAs made with the Interactive CYOA creator",
-  "author": "psculley3@gmail.com",
-  "short_name": "CYOA tool"
+  "author": "lak20",
+  "short_name": "CYOA tool svelte"
 }
