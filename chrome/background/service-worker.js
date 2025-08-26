@@ -74,6 +74,18 @@ function pageScript(extId) {
         }));
 
         chrome.runtime.sendMessage(extId, { type: 'points', points });
+        
+        // Also send row information
+        function collectRowInfo(row) {
+          return {
+            name: row.name || row.title || '',
+            id: row.id,
+            hasObjects: !!(row.objects && row.objects.length)
+          };
+        }
+
+        const rows = Array.from(app.rows).map(collectRowInfo);
+        chrome.runtime.sendMessage(extId, { type: 'rows', rows });
       }
     })();  
   } catch (e) {}
