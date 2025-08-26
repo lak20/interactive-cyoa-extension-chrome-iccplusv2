@@ -11,10 +11,121 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
     switch (message.type) {
       case 'points':
         updatePoints(message.points, sender.frameId);
+        // After receiving points, get row information
+        getCurrentTab().then((tab) => {
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id, frameIds: [sender.frameId] },
+            func: getRowsInfo,
+            world: chrome.scripting.ExecutionWorld.MAIN
+        });
+      });
+      break;
+    case 'rows':
+      updateRowControls(message.rows, sender.frameId);
         break;
     }
   }
 });
+
+
+function getRowsInfo() {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').__vue__.$store.state.app;
+      } catch (e) {}
+      if (!app) {
+        // try svelte
+        app = window.debugApp;
+      }
+
+      function collectRowInfo(row) {
+        return {
+          name: row.name || row.title || '',
+          id: row.id,
+          hasObjects: !!(row.objects && row.objects.length)
+        };
+      }
+
+      const rows = Array.from(app.rows).map(collectRowInfo);
+      chrome.runtime.sendMessage({ type: 'rows', rows });
+    })();
+  } catch (e) {}
+}
+
+function createRowActionButtons(row, index, frameId) {
+  const container = document.createElement('div');
+  container.className = 'row-actions';
+
+  const rowNameElem = document.createElement('div');
+  rowNameElem.className = 'row-name';
+  rowNameElem.textContent = row.name || `Row ${index + 1}`;
+  
+  const removeRowLimitsBtn = document.createElement('button');
+  removeRowLimitsBtn.textContent = 'Remove Row Limit';
+  removeRowLimitsBtn.onclick = () => {
+    getCurrentTab().then((tab) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [frameId] },
+        func: removeRowLimits,
+        args: [index],
+        world: chrome.scripting.ExecutionWorld.MAIN
+      });
+    });
+  };
+
+  const removeRequirementsBtn = document.createElement('button');
+  removeRequirementsBtn.textContent = 'Remove Requirements';
+  removeRequirementsBtn.onclick = () => {
+    getCurrentTab().then((tab) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [frameId] },
+        func: removeRequirements,
+        args: [index],
+        world: chrome.scripting.ExecutionWorld.MAIN
+      });
+    });
+  };
+
+  const removeRandomnessBtn = document.createElement('button');
+  removeRandomnessBtn.textContent = 'Remove Randomness';
+  removeRandomnessBtn.onclick = () => {
+    getCurrentTab().then((tab) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [frameId] },
+        func: removeRandomness,
+        args: [index],
+        world: chrome.scripting.ExecutionWorld.MAIN
+      });
+    });
+  };
+
+  container.appendChild(rowNameElem);
+  container.appendChild(removeRowLimitsBtn);
+  container.appendChild(removeRequirementsBtn);
+  container.appendChild(removeRandomnessBtn);
+  return container;
+}
+
+function updateRowControls(rows, frameId) {
+  const rowActionsContainer = document.getElementById('row-actions-container');
+  rowActionsContainer.innerHTML = ''; // Clear existing buttons
+  
+  if (rows.length === 0) {
+    const noRowsMsg = document.createElement('div');
+    noRowsMsg.className = 'no-rows-message';
+    noRowsMsg.textContent = 'No rows found';
+    rowActionsContainer.appendChild(noRowsMsg);
+    return;
+  }
+
+  rows.forEach((row, index) => {
+    const rowButtons = createRowActionButtons(row, index, frameId);
+    rowActionsContainer.appendChild(rowButtons);
+  });
+}
 
 function updatePoints(points, frameId = 0) {
   for (let i = 0; i < points.length; i++) {
@@ -95,7 +206,7 @@ document.getElementById('remove-row-limits-button').onclick = async () => {
   } catch(e) {}
 };
 
-function removeRowLimits() {
+function removeRowLimits(rowIndex = null) {
   try {
     (() => {
       let app = undefined;
@@ -109,14 +220,24 @@ function removeRowLimits() {
       }
     
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
       }
+
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
           row.objects.forEach((row) => allObjects(row, func));
         }
       }
+
       allThings((obj) => obj.allowedChoices = 0);
     })();
   } catch (e) {}
@@ -135,7 +256,7 @@ document.getElementById('remove-randomness-button').onclick = async () => {
   } catch(e) {}
 };
 
-function removeRandomness() {
+function removeRandomness(rowIndex = null) {
   try {
     (() => {
       let app = undefined;
@@ -149,8 +270,17 @@ function removeRandomness() {
       }
     
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
       }
+
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
@@ -175,7 +305,7 @@ document.getElementById('remove-requirements-button').onclick = async () => {
   } catch (e) {}
 };
 
-function removeRequirements() {
+function removeRequirements(rowIndex = null) {
   try {
     (() => {
       let app = undefined;
@@ -189,8 +319,17 @@ function removeRequirements() {
       }
 
       function allThings(func) {
-        app.rows.forEach((row) => allObjects(row, func));
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
       }
+      
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
