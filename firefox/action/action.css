@@ -48,6 +48,30 @@ body {
   margin: 1px;
 }
 
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+  margin: 5px 0;
+  gap: 5px;
+}
+
+.row-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.row-name {
+  width: auto;
+  font-weight: bold;
+  padding-right: 5px;
+  text-align: left;
+}
+
 .action-group h3 {
   margin: 0;
   padding: 1px 0;

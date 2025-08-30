@@ -71,6 +71,14 @@ function createRowActionButtons(row, index, frameId) {
   rowNameElem.className = 'row-name';
   rowNameElem.textContent = row.name || `Row ${index + 1}`;
   
+  // Create left container
+  const leftContainer = document.createElement('div');
+  leftContainer.className = 'row-button-container';
+  
+  // Create right container
+  const rightContainer = document.createElement('div');
+  rightContainer.className = 'row-button-container';
+
   const removeRowLimitsBtn = document.createElement('button');
   removeRowLimitsBtn.textContent = 'Remove Row Limit';
   removeRowLimitsBtn.onclick = () => {
@@ -107,10 +115,30 @@ function createRowActionButtons(row, index, frameId) {
     });
   };
 
+  const toggleRequirementsBtn = document.createElement('button');
+  toggleRequirementsBtn.textContent = 'Toggle Requirements';
+  toggleRequirementsBtn.onclick = () => {
+    getCurrentTab().then((tab) => {
+      browser.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [frameId] },
+        func: showAllRequirements,
+        args: [index]
+      });
+    });
+  };
+
+  // Add buttons to left container
+  leftContainer.appendChild(removeRowLimitsBtn);
+  leftContainer.appendChild(removeRequirementsBtn);
+
+  // Add buttons to right container
+  rightContainer.appendChild(removeRandomnessBtn);
+  rightContainer.appendChild(toggleRequirementsBtn);
+
+  // Add all elements to main container
   container.appendChild(rowNameElem);
-  container.appendChild(removeRowLimitsBtn);
-  container.appendChild(removeRequirementsBtn);
-  container.appendChild(removeRandomnessBtn);
+  container.appendChild(leftContainer);
+  container.appendChild(rightContainer);
   return container;
 }
 
@@ -335,6 +363,72 @@ document.getElementById('remove-requirements-button').onclick = async () => {
     });
   } catch (e) {}
 };
+
+document.getElementById('show-requirements-button').onclick = async () => {
+  try {
+    await browser.scripting.executeScript({
+      target: {
+        tabId: (await getCurrentTab()).id,
+        allFrames: true
+      },
+      func: showAllRequirements
+    });
+  } catch (e) {}
+};
+
+function showAllRequirements(rowIndex = null) {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app;
+      } catch (e) {}
+      if (!app) {
+        try {
+          app = document.querySelector('#app').__vue__.$store.state.app;
+        } catch (e) {}
+      }
+      if (!app) {
+        // try svelte
+        try {
+          app = window.wrappedJSObject.debugApp;
+        } catch (e){}
+        if (!app) {
+          app = window.debugApp;
+        }
+      }
+
+      function allThings(func) {
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
+      }
+
+      function allObjects(row, func) {
+        func(row);
+        if (row.objects && row.objects.length) {
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        }
+      }
+      
+      allThings((obj) => {
+        if (obj.requireds && obj.requireds.length > 0) {
+          // Toggle showRequired for all requirements in this object
+          Array.prototype.forEach.call(obj.requireds, (req) => {
+            req.showRequired = !req.showRequired;
+          });
+        }
+      });
+    })();
+  } catch (e) {}
+}
 
 function removeRequirements(rowIndex = null) {
   try {
