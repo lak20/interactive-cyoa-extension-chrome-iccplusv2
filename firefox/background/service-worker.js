@@ -1,6 +1,6 @@
-chrome.runtime.onInstalled.addListener(async () => {
-  await chrome.action.disable();
-  await chrome.action.setBadgeBackgroundColor(
+browser.runtime.onInstalled.addListener(async () => {
+  await browser.action.disable();
+  await browser.action.setBadgeBackgroundColor(
     { color: '#FFFFFF' }
   );
 });

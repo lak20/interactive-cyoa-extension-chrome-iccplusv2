@@ -40,6 +40,18 @@ function getRowsInfo() {
         } catch (e) {}
       }
       if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      }
+      if (!app) {
         // try svelte
         try {
           app = window.wrappedJSObject.debugApp;
@@ -121,7 +133,7 @@ function createRowActionButtons(row, index, frameId) {
     getCurrentTab().then((tab) => {
       browser.scripting.executeScript({
         target: { tabId: tab.id, frameIds: [frameId] },
-        func: showAllRequirements,
+        func: toggleAllRequirements,
         args: [index]
       });
     });
@@ -221,6 +233,18 @@ function updatePoint(index, value) {
         } catch (e) {}
       }
       if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      }
+      if (!app) {
         // try svelte
         try {
           app = window.wrappedJSObject.debugApp;
@@ -259,6 +283,18 @@ function removeRowLimits(rowIndex = null) {
         try {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) {}
+      }
+      if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       }
       if (!app) {
         // try svelte
@@ -320,6 +356,18 @@ function removeRandomness(rowIndex = null) {
         } catch (e) {}
       }
       if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      }
+      if (!app) {
         // try svelte
         try {
           app = window.wrappedJSObject.debugApp;
@@ -364,6 +412,18 @@ document.getElementById('remove-requirements-button').onclick = async () => {
   } catch (e) {}
 };
 
+document.getElementById('toggle-requirements-button').onclick = async () => {
+  try {
+    await browser.scripting.executeScript({
+      target: {
+        tabId: (await getCurrentTab()).id,
+        allFrames: true
+      },
+      func: toggleAllRequirements
+    });
+  } catch (e) {}
+};
+
 document.getElementById('show-requirements-button').onclick = async () => {
   try {
     await browser.scripting.executeScript({
@@ -376,7 +436,7 @@ document.getElementById('show-requirements-button').onclick = async () => {
   } catch (e) {}
 };
 
-function showAllRequirements(rowIndex = null) {
+function toggleAllRequirements(rowIndex = null) {
   try {
     (() => {
       let app = undefined;
@@ -388,6 +448,18 @@ function showAllRequirements(rowIndex = null) {
         try {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) {}
+      }
+      if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       }
       if (!app) {
         // try svelte
@@ -430,6 +502,72 @@ function showAllRequirements(rowIndex = null) {
   } catch (e) {}
 }
 
+function showAllRequirements(rowIndex = null) {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app;
+      } catch (e) {}
+      if (!app) {
+        try {
+          app = document.querySelector('#app').__vue__.$store.state.app;
+        } catch (e) {}
+      }
+      if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      }
+      if (!app) {
+        // try svelte
+        try {
+          app = window.wrappedJSObject.debugApp;
+        } catch (e){}
+        if (!app) {
+          app = window.debugApp;
+        }
+      }
+
+      function allThings(func) {
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
+      }
+
+      function allObjects(row, func) {
+        func(row);
+        if (row.objects && row.objects.length) {
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        }
+      }
+      
+      allThings((obj) => {
+        if (obj.requireds && obj.requireds.length > 0) {
+          // Set showRequired to true for all requirements in this object
+          Array.prototype.forEach.call(obj.requireds, (req) => {
+            req.showRequired = true;
+          });
+        }
+      });
+    })();
+  } catch (e) {}
+}
+
 function removeRequirements(rowIndex = null) {
   try {
     (() => {
@@ -442,6 +580,18 @@ function removeRequirements(rowIndex = null) {
         try {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) {}
+      }
+      if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          // Try with wrappedJSObject first
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            // Fallback to without wrappedJSObject
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       }
       if (!app) {
         // try svelte

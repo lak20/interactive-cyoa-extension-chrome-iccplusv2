@@ -36,6 +36,12 @@ function getRowsInfo() {
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
       if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      if (!app) {
         // try svelte
         app = window.debugApp;
       }
@@ -69,6 +75,7 @@ function createRowActionButtons(row, index, frameId) {
   // Create right container
   const rightContainer = document.createElement('div');
   rightContainer.className = 'row-button-container';  
+
   const removeRowLimitsBtn = document.createElement('button');
   removeRowLimitsBtn.textContent = 'Remove Row Limit';
   removeRowLimitsBtn.onclick = () => {
@@ -107,13 +114,14 @@ function createRowActionButtons(row, index, frameId) {
       });
     });
   };
+
   const toggleRequirementsBtn = document.createElement('button');
   toggleRequirementsBtn.textContent = 'Toggle Requirements';
   toggleRequirementsBtn.onclick = () => {
     getCurrentTab().then((tab) => {
       chrome.scripting.executeScript({
         target: { tabId: tab.id, frameIds: [frameId] },
-        func: showAllRequirements,
+        func: toggleAllRequirements,
         args: [index],
         world: chrome.scripting.ExecutionWorld.MAIN
       });
@@ -210,6 +218,12 @@ function updatePoint(index, value) {
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
       if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      if (!app) {
         // try svelte
         app = window.debugApp;
       }
@@ -240,6 +254,12 @@ function removeRowLimits(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
+      if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -291,6 +311,12 @@ function removeRandomness(rowIndex = null) {
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
       if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      if (!app) {
         // try svelte
         app = window.debugApp;
       }
@@ -331,9 +357,22 @@ document.getElementById('remove-requirements-button').onclick = async () => {
   } catch (e) {}
 };
 
+document.getElementById('toggle-requirements-button').onclick = async () => {
+  try {
+    await chrome.scripting.executeScript({
+      target: {
+        tabId: (await getCurrentTab()).id,
+        allFrames: true
+      },
+      func: toggleAllRequirements,
+      world: chrome.scripting.ExecutionWorld.MAIN
+    });
+  } catch (e) {}
+};
+
 document.getElementById('show-requirements-button').onclick = async () => {
   try {
-    await browser.scripting.executeScript({
+    await chrome.scripting.executeScript({
       target: {
         tabId: (await getCurrentTab()).id,
         allFrames: true
@@ -344,7 +383,7 @@ document.getElementById('show-requirements-button').onclick = async () => {
   } catch (e) {}
 };
 
-function showAllRequirements(rowIndex = null) {
+function toggleAllRequirements(rowIndex = null) {
   try {
     (() => {
       let app = undefined;
@@ -352,6 +391,12 @@ function showAllRequirements(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
+      if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -388,6 +433,56 @@ function showAllRequirements(rowIndex = null) {
   } catch (e) {}
 }
 
+function showAllRequirements(rowIndex = null) {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').__vue__.$store.state.app;
+      } catch (e) {}
+      if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
+      if (!app) {
+        // try svelte
+        app = window.debugApp;
+      }
+
+      function allThings(func) {
+        if (rowIndex !== null) {
+          // Handle single row
+          if (app.rows[rowIndex]) {
+            allObjects(app.rows[rowIndex], func);
+          }
+        } else {
+          // Handle all rows
+          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+        }
+      }
+
+      function allObjects(row, func) {
+        func(row);
+        if (row.objects && row.objects.length) {
+          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        }
+      }
+      
+      allThings((obj) => {
+        if (obj.requireds && obj.requireds.length > 0) {
+          // Set showRequired to true for all requirements in this object
+          Array.prototype.forEach.call(obj.requireds, (req) => {
+            req.showRequired = true;
+          });
+        }
+      });
+    })();
+  } catch (e) {}
+}
+
 function removeRequirements(rowIndex = null) {
   try {
     (() => {
@@ -396,6 +491,12 @@ function removeRequirements(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) {}
+      if (!app) {
+          try {
+            // try nuxt (ltouroumov version)
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) {}
+        }
       if (!app) {
         // try svelte
         app = window.debugApp;
