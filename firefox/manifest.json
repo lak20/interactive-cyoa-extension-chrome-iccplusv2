@@ -5,7 +5,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "interactiveassisttoolsvelte@cyoa",
-      "update_url": "https://raw.githubusercontent.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/master/firefox/updates.json"
+      "update_url": "https://raw.githubusercontent.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/master/firefox/updates.json",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
   "action": {
