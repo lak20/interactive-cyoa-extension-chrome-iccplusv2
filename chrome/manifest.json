@@ -1,8 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Interactive CYOA assist tool for icc+v2",
-  "version": "0.0.3.6",
-
+  "version": "0.0.3.8",
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
@@ -11,13 +10,22 @@
     },
     "default_popup": "action/action.html"
   },
-  "permissions": ["scripting", "webNavigation", "tabs"],
-  "host_permissions": ["<all_urls>", "*://*/*"],
+  "permissions": [
+    "scripting",
+    "webNavigation",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "*://*/*"
+  ],
   "background": {
     "service_worker": "background/service-worker.js"
   },
   "externally_connectable": {
-    "matches": ["<all_urls>"]
+    "matches": [
+      "<all_urls>"
+    ]
   },
   "description": "A tool to assist filling out interactive CYOAs made with the Interactive CYOA creator",
   "author": "lak20",

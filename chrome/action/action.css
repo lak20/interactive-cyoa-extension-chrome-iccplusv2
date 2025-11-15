@@ -1,21 +1,34 @@
 body {
   width: fit-content;
 }
+
 .container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
+
 .point {
   display: flex;
+  left: 10px;
   flex-direction: row;
   gap: 10px;
   justify-content: space-between;
 }
-.name, .value, #remove-row-limits-button {
+
+.point-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+
+.name,
+.value,
+#remove-row-limits-button {
   inline-size: max-content;
 }
+
 .value {
   width: 50px;
 }
@@ -23,27 +36,34 @@ body {
 #actions-container {
   display: none;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 1px;
+  overflow-x: auto;
+  max-width: 600px;
 }
 
 #points-container {
-  width: 100%;
   padding: 2px;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
   margin: 2px 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  min-width: max-content;
+}
+
+.sticky-section {
+  position: sticky !important;
+  left: 10px !important;
 }
 
 .action-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
   gap: 2px;
-  width: 100%;
+  min-width: max-content;
   padding: 1px;
   margin: 1px;
 }
@@ -51,7 +71,7 @@ body {
 .row-actions {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
   width: 100%;
   padding: 2px;
   margin: 2px 0;
@@ -62,7 +82,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  flex: 1;
 }
 
 .row-name {
@@ -111,11 +130,11 @@ button:active {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1px;
   padding: 1px;
   border-bottom: 1px solid #eee;
-  width: 100%;
+  min-width: max-content;
   background: #fff;
 }
 

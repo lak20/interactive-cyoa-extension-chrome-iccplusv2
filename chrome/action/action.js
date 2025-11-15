@@ -1,12 +1,24 @@
 const pointsContainer = document.getElementById('points-container');
 const actionsContainer = document.getElementById('actions-container');
 
+// Scroll to middle when the container is shown
+function scrollToMiddle() {
+  setTimeout(() => {
+    const scrollWidth = actionsContainer.scrollWidth;
+    const clientWidth = actionsContainer.clientWidth;
+    if (scrollWidth > clientWidth) {
+      actionsContainer.scrollLeft = (scrollWidth - clientWidth) / 2;
+    }
+  }, 0);
+}
+
 chrome.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
   const tab = await getCurrentTab();
 
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
+      scrollToMiddle();
     }
     switch (message.type) {
       case 'points':
@@ -17,11 +29,11 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
             target: { tabId: tab.id, frameIds: [sender.frameId] },
             func: getRowsInfo,
             world: chrome.scripting.ExecutionWorld.MAIN
+          });
         });
-      });
-      break;
-    case 'rows':
-      updateRowControls(message.rows, sender.frameId);
+        break;
+      case 'rows':
+        updateRowControls(message.rows, sender.frameId);
         break;
     }
   }
@@ -34,13 +46,13 @@ function getRowsInfo() {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -57,7 +69,7 @@ function getRowsInfo() {
       const rows = Array.from(app.rows).map(collectRowInfo);
       chrome.runtime.sendMessage({ type: 'rows', rows });
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function createRowActionButtons(row, index, frameId) {
@@ -67,14 +79,14 @@ function createRowActionButtons(row, index, frameId) {
   const rowNameElem = document.createElement('div');
   rowNameElem.className = 'row-name';
   rowNameElem.textContent = row.name || `Row ${index + 1}`;
-  
+
   // Create left container
   const leftContainer = document.createElement('div');
   leftContainer.className = 'row-button-container';
-  
+
   // Create right container
   const rightContainer = document.createElement('div');
-  rightContainer.className = 'row-button-container';  
+  rightContainer.className = 'row-button-container';
 
   const removeRowLimitsBtn = document.createElement('button');
   removeRowLimitsBtn.textContent = 'Remove Row Limit';
@@ -146,7 +158,7 @@ function createRowActionButtons(row, index, frameId) {
 function updateRowControls(rows, frameId) {
   const rowActionsContainer = document.getElementById('row-actions-container');
   rowActionsContainer.innerHTML = ''; // Clear existing buttons
-  
+
   if (rows.length === 0) {
     const noRowsMsg = document.createElement('div');
     noRowsMsg.className = 'no-rows-message';
@@ -187,10 +199,57 @@ function updatePoints(points, frameId = 0) {
               world: chrome.scripting.ExecutionWorld.MAIN
             });
           });
-        } catch(e) {}
+        } catch (e) { }
       };
+
+      // Create button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'point-button-container';
+
+      // Add +5 button
+      const add5Btn = document.createElement('button');
+      add5Btn.textContent = '+5';
+      add5Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue + 5;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id, frameIds: [frameId] },
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      // Add +10 button
+      const add10Btn = document.createElement('button');
+      add10Btn.textContent = '+10';
+      add10Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue + 10;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id, frameIds: [frameId] },
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      buttonContainer.appendChild(add5Btn);
+      buttonContainer.appendChild(add10Btn);
+
       child.appendChild(nameElem);
       child.appendChild(valueElem);
+      child.appendChild(buttonContainer);
       pointsContainer.appendChild(child);
     }
 
@@ -216,13 +275,13 @@ function updatePoint(index, value) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -230,7 +289,7 @@ function updatePoint(index, value) {
 
       app.pointTypes[index].startingSum = value;
     })()
-  } catch(e) {}
+  } catch (e) { }
 }
 
 document.getElementById('remove-row-limits-button').onclick = async () => {
@@ -243,7 +302,7 @@ document.getElementById('remove-row-limits-button').onclick = async () => {
       func: removeRowLimits,
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch(e) {}
+  } catch (e) { }
 };
 
 function removeRowLimits(rowIndex = null) {
@@ -253,18 +312,18 @@ function removeRowLimits(rowIndex = null) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
       }
-    
+
       function allThings(func) {
         if (rowIndex !== null) {
           // Handle single row
@@ -286,7 +345,7 @@ function removeRowLimits(rowIndex = null) {
 
       allThings((obj) => obj.allowedChoices = 0);
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 document.getElementById('remove-randomness-button').onclick = async () => {
@@ -299,7 +358,7 @@ document.getElementById('remove-randomness-button').onclick = async () => {
       func: removeRandomness,
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch(e) {}
+  } catch (e) { }
 };
 
 function removeRandomness(rowIndex = null) {
@@ -309,18 +368,18 @@ function removeRandomness(rowIndex = null) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
       }
-    
+
       function allThings(func) {
         if (rowIndex !== null) {
           // Handle single row
@@ -341,7 +400,7 @@ function removeRandomness(rowIndex = null) {
       }
       allThings((obj) => obj.isInfoRow && (obj.isInfoRow = false));
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 document.getElementById('remove-requirements-button').onclick = async () => {
@@ -354,7 +413,7 @@ document.getElementById('remove-requirements-button').onclick = async () => {
       func: removeRequirements,
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch (e) {}
+  } catch (e) { }
 };
 
 document.getElementById('toggle-requirements-button').onclick = async () => {
@@ -367,7 +426,7 @@ document.getElementById('toggle-requirements-button').onclick = async () => {
       func: toggleAllRequirements,
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch (e) {}
+  } catch (e) { }
 };
 
 document.getElementById('show-requirements-button').onclick = async () => {
@@ -380,7 +439,7 @@ document.getElementById('show-requirements-button').onclick = async () => {
       func: showAllRequirements,
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch (e) {}
+  } catch (e) { }
 };
 
 function toggleAllRequirements(rowIndex = null) {
@@ -390,13 +449,13 @@ function toggleAllRequirements(rowIndex = null) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -420,7 +479,7 @@ function toggleAllRequirements(rowIndex = null) {
           Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
         }
       }
-      
+
       allThings((obj) => {
         if (obj.requireds && obj.requireds.length > 0) {
           // Toggle showRequired for all requirements in this object
@@ -430,7 +489,7 @@ function toggleAllRequirements(rowIndex = null) {
         }
       });
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function showAllRequirements(rowIndex = null) {
@@ -440,13 +499,13 @@ function showAllRequirements(rowIndex = null) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -470,7 +529,7 @@ function showAllRequirements(rowIndex = null) {
           Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
         }
       }
-      
+
       allThings((obj) => {
         if (obj.requireds && obj.requireds.length > 0) {
           // Set showRequired to true for all requirements in this object
@@ -480,7 +539,7 @@ function showAllRequirements(rowIndex = null) {
         }
       });
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function removeRequirements(rowIndex = null) {
@@ -490,13 +549,13 @@ function removeRequirements(rowIndex = null) {
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
-      } catch (e) {}
+      } catch (e) { }
       if (!app) {
-          try {
-            // try nuxt (ltouroumov version)
-            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
-        }
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) { }
+      }
       if (!app) {
         // try svelte
         app = window.debugApp;
@@ -513,7 +572,7 @@ function removeRequirements(rowIndex = null) {
           Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
         }
       }
-      
+
       function allObjects(row, func) {
         func(row);
         if (row.objects && row.objects.length) {
@@ -522,7 +581,7 @@ function removeRequirements(rowIndex = null) {
       }
       allThings((obj) => obj.requireds ? obj.requireds = [] : undefined);
     })();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 async function getCurrentTab() {
