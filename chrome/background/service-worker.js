@@ -15,7 +15,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       args: [chrome.runtime.id],
       world: chrome.scripting.ExecutionWorld.MAIN
     });
-  } catch (e) {}
+  } catch (e) { }
 });
 
 chrome.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
@@ -29,25 +29,43 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
   }
 });
 
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  // Relay messages from pageScript to the popup
+  const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
+  if (popup) {
+    chrome.runtime.sendMessage(popup.id, message).catch(() => { });
+  }
+});
+
 function pageScript(extId) {
   try {
     (() => {
       const attachInterval = setInterval(() => {
         try {
           let app = undefined;
+          let hasGameState = false;
           try {
             // try vue
             app = document.querySelector('#app').__vue__.$store.state.app;
-          } catch (e) {}
+          } catch (e) { }
           if (!app) {
             try {
               // try nuxt (ltouroumov version)
               app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-            } catch (e) {}
+            } catch (e) { }
           }
           if (!app) {
             // try svelte
             app = window.debugApp;
+          }
+          if (!app) {
+            // try window.game.state.points
+            try {
+              if (window.game?.state?.points) {
+                hasGameState = true;
+                app = true; // just marker that we found something
+              }
+            } catch (e) { }
           }
 
           if (!app) return;
@@ -56,7 +74,7 @@ function pageScript(extId) {
           chrome.runtime.sendMessage(extId, { type: 'activate' });
 
           setInterval(updateScores, 500);
-        } catch(e) {}
+        } catch (e) { }
       }, 1000);
 
       setTimeout(() => clearInterval(attachInterval), 5 * 60 * 1000); // stop trying after 5 minutes
@@ -66,39 +84,70 @@ function pageScript(extId) {
         try {
           // try vue
           app = document.querySelector('#app').__vue__.$store.state.app;
-        } catch (e) {}
+        } catch (e) { }
         if (!app) {
           try {
             // try nuxt (ltouroumov version)
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
-          } catch (e) {}
+          } catch (e) { }
         }
         if (!app) {
           // try svelte
           app = window.debugApp;
         }
 
-        if (!app) return;
-
-        const points = app.pointTypes.map((point) => ({
-          name: point.name,
-          value: point.startingSum
-        }));
-
-        chrome.runtime.sendMessage(extId, { type: 'points', points });
-        
-        // Also send row information
-        function collectRowInfo(row) {
-          return {
-            name: row.name || row.title || '',
-            id: row.id,
-            hasObjects: !!(row.objects && row.objects.length)
-          };
+        let points;
+        if (app && app.pointTypes) {
+          points = app.pointTypes.map((point) => ({
+            name: point.name,
+            value: point.startingSum
+          }));
+        } else {
+          // try window.game.state.points
+          try {
+            const gamePoints = window.game?.state?.points;
+            if (gamePoints) {
+              points = Object.entries(gamePoints).map(([name, value]) => ({
+                name: name,
+                value: value
+              }));
+            }
+          } catch (e) { }
         }
 
-        const rows = Array.from(app.rows).map(collectRowInfo);
-        chrome.runtime.sendMessage(extId, { type: 'rows', rows });
+        if (!points) return;
+
+        chrome.runtime.sendMessage(extId, { type: 'points', points });
+
+        // Also send row information
+        let rows;
+        if (app && app.rows) {
+          function collectRowInfo(row) {
+            return {
+              name: row.name || row.title || '',
+              id: row.id,
+              hasObjects: !!(row.objects && row.objects.length)
+            };
+          }
+          rows = Array.from(app.rows).map(collectRowInfo);
+        } else {
+          // try window.game.data.sections
+          try {
+            const sections = window.game?.data?.sections;
+            if (sections) {
+              rows = Array.from(sections).map((section, index) => ({
+                name: section.id || '',
+                id: index,
+                hasObjects: false
+              }));
+            }
+          } catch (e) { }
+        }
+
+        if (rows) {
+          chrome.runtime.sendMessage(extId, { type: 'rows', rows });
+        }
       }
-    })();  
-  } catch (e) {}
+    })();
+  } catch (e) { }
 }

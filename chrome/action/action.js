@@ -12,7 +12,7 @@ function scrollToMiddle() {
   }, 0);
 }
 
-chrome.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const tab = await getCurrentTab();
 
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
@@ -58,16 +58,33 @@ function getRowsInfo() {
         app = window.debugApp;
       }
 
-      function collectRowInfo(row) {
-        return {
-          name: row.name || row.title || '',
-          id: row.id,
-          hasObjects: !!(row.objects && row.objects.length)
-        };
+      let rows;
+      if (app && app.rows) {
+        function collectRowInfo(row) {
+          return {
+            name: row.name || row.title || '',
+            id: row.id,
+            hasObjects: !!(row.objects && row.objects.length)
+          };
+        }
+        rows = Array.from(app.rows).map(collectRowInfo);
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.game?.data?.sections;
+          if (sections) {
+            rows = Array.from(sections).map((section, index) => ({
+              name: section.id || '',
+              id: index,
+              hasObjects: false
+            }));
+          }
+        } catch (e) { }
       }
 
-      const rows = Array.from(app.rows).map(collectRowInfo);
-      chrome.runtime.sendMessage({ type: 'rows', rows });
+      if (rows) {
+        chrome.runtime.sendMessage({ type: 'rows', rows });
+      }
     })();
   } catch (e) { }
 }
@@ -272,6 +289,7 @@ function updatePoint(index, value) {
   try {
     (() => {
       let app = undefined;
+      let pointName = undefined;
       try {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
@@ -287,7 +305,22 @@ function updatePoint(index, value) {
         app = window.debugApp;
       }
 
-      app.pointTypes[index].startingSum = value;
+      if (!app) {
+        // try window.game.state.points
+        try {
+          const pointTypes = Object.keys(window.game.state.points);
+          pointName = pointTypes[index];
+          if (pointName) {
+            window.game.state.points[pointName] = value;
+            window.game.updateAfterToggle?.();
+            return;
+          }
+        } catch (e) { }
+      }
+
+      if (app) {
+        app.pointTypes[index].startingSum = value;
+      }
     })()
   } catch (e) { }
 }
@@ -324,26 +357,46 @@ function removeRowLimits(rowIndex = null) {
         app = window.debugApp;
       }
 
-      function allThings(func) {
-        if (rowIndex !== null) {
-          // Handle single row
-          if (app.rows[rowIndex]) {
-            allObjects(app.rows[rowIndex], func);
+      if (app && app.rows) {
+        function allThings(func) {
+          if (rowIndex !== null) {
+            // Handle single row
+            if (app.rows[rowIndex]) {
+              allObjects(app.rows[rowIndex], func);
+            }
+          } else {
+            // Handle all rows
+            Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
           }
-        } else {
-          // Handle all rows
-          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
         }
-      }
 
-      function allObjects(row, func) {
-        func(row);
-        if (row.objects && row.objects.length) {
-          row.objects.forEach((row) => allObjects(row, func));
+        function allObjects(row, func) {
+          func(row);
+          if (row.objects && row.objects.length) {
+            row.objects.forEach((row) => allObjects(row, func));
+          }
         }
-      }
 
-      allThings((obj) => obj.allowedChoices = 0);
+        allThings((obj) => obj.allowedChoices = 0);
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.game?.data?.sections;
+          if (sections) {
+            if (rowIndex !== null) {
+              // Handle single section
+              if (sections[rowIndex]) {
+                delete sections[rowIndex].maxSelections;
+              }
+            } else {
+              // Handle all sections
+              Array.prototype.forEach.call(sections, (section) => {
+                delete section.maxSelections;
+              });
+            }
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
