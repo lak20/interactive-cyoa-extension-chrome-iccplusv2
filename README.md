@@ -1,6 +1,6 @@
 This is a not so minimum effort fork of the original CYOA assist tool available at https://github.com/peteresculley/interactive-cyoa-extension-chrome. 
 
-Now also supports point manipulation and removing row limits for DW's new engine.
+Now also supports point manipulation and removing row limits and requirements for DW's new engine.
 
 Now also kinda supports the ltouroumov version. Only point manipulation works in the ltouroumov version i currently don't know how to fix it. :(
 

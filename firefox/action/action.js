@@ -440,6 +440,11 @@ function removeRowLimits(rowIndex = null) {
                 delete section.maxSelections;
               });
             }
+            try {
+              window.wrappedJSObject.game.updateAfterToggle?.();
+            } catch (e) {
+              window.game.updateAfterToggle?.();
+            }
           }
         } catch (e) { }
       }
@@ -588,33 +593,65 @@ function toggleAllRequirements(rowIndex = null) {
         }
       }
 
-      function allThings(func) {
-        if (rowIndex !== null) {
-          // Handle single row
-          if (app.rows[rowIndex]) {
-            allObjects(app.rows[rowIndex], func);
+      if (app && app.rows) {
+        function allThings(func) {
+          if (rowIndex !== null) {
+            // Handle single row
+            if (app.rows[rowIndex]) {
+              allObjects(app.rows[rowIndex], func);
+            }
+          } else {
+            // Handle all rows
+            Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
           }
-        } else {
-          // Handle all rows
-          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
         }
-      }
 
-      function allObjects(row, func) {
-        func(row);
-        if (row.objects && row.objects.length) {
-          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        function allObjects(row, func) {
+          func(row);
+          if (row.objects && row.objects.length) {
+            Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+          }
         }
-      }
 
-      allThings((obj) => {
-        if (obj.requireds && obj.requireds.length > 0) {
-          // Toggle showRequired for all requirements in this object
-          Array.prototype.forEach.call(obj.requireds, (req) => {
-            req.showRequired = !req.showRequired;
-          });
-        }
-      });
+        allThings((obj) => {
+          if (obj.requireds && obj.requireds.length > 0) {
+            // Toggle showRequired for all requirements in this object
+            Array.prototype.forEach.call(obj.requireds, (req) => {
+              req.showRequired = !req.showRequired;
+            });
+          }
+        });
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
+          if (sections) {
+            const process = (section) => {
+              if (section.cards && section.cards.length) {
+                Array.prototype.forEach.call(section.cards, (card) => {
+                  if (card.requirements && card.requirements.length > 0) {
+                    Array.prototype.forEach.call(card.requirements, (req) => {
+                      req.showRequired = !req.showRequired;
+                    });
+                  }
+                });
+              }
+            };
+            if (rowIndex !== null) {
+              if (sections[rowIndex]) {
+                process(sections[rowIndex]);
+              }
+            } else {
+              Array.prototype.forEach.call(sections, process);
+            }
+            try {
+              window.wrappedJSObject.game.updateAfterToggle?.();
+            } catch (e) {
+              window.game.updateAfterToggle?.();
+            }
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -654,33 +691,65 @@ function showAllRequirements(rowIndex = null) {
         }
       }
 
-      function allThings(func) {
-        if (rowIndex !== null) {
-          // Handle single row
-          if (app.rows[rowIndex]) {
-            allObjects(app.rows[rowIndex], func);
+      if (app && app.rows) {
+        function allThings(func) {
+          if (rowIndex !== null) {
+            // Handle single row
+            if (app.rows[rowIndex]) {
+              allObjects(app.rows[rowIndex], func);
+            }
+          } else {
+            // Handle all rows
+            Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
           }
-        } else {
-          // Handle all rows
-          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
         }
-      }
 
-      function allObjects(row, func) {
-        func(row);
-        if (row.objects && row.objects.length) {
-          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        function allObjects(row, func) {
+          func(row);
+          if (row.objects && row.objects.length) {
+            Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+          }
         }
-      }
 
-      allThings((obj) => {
-        if (obj.requireds && obj.requireds.length > 0) {
-          // Set showRequired to true for all requirements in this object
-          Array.prototype.forEach.call(obj.requireds, (req) => {
-            req.showRequired = true;
-          });
-        }
-      });
+        allThings((obj) => {
+          if (obj.requireds && obj.requireds.length > 0) {
+            // Set showRequired to true for all requirements in this object
+            Array.prototype.forEach.call(obj.requireds, (req) => {
+              req.showRequired = true;
+            });
+          }
+        });
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
+          if (sections) {
+            const process = (section) => {
+              if (section.cards && section.cards.length) {
+                Array.prototype.forEach.call(section.cards, (card) => {
+                  if (card.requirements && card.requirements.length > 0) {
+                    Array.prototype.forEach.call(card.requirements, (req) => {
+                      req.showRequired = true;
+                    });
+                  }
+                });
+              }
+            };
+            if (rowIndex !== null) {
+              if (sections[rowIndex]) {
+                process(sections[rowIndex]);
+              }
+            } else {
+              Array.prototype.forEach.call(sections, process);
+            }
+            try {
+              window.wrappedJSObject.game.updateAfterToggle?.();
+            } catch (e) {
+              window.game.updateAfterToggle?.();
+            }
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -720,25 +789,53 @@ function removeRequirements(rowIndex = null) {
         }
       }
 
-      function allThings(func) {
-        if (rowIndex !== null) {
-          // Handle single row
-          if (app.rows[rowIndex]) {
-            allObjects(app.rows[rowIndex], func);
+      if (app && app.rows) {
+        function allThings(func) {
+          if (rowIndex !== null) {
+            // Handle single row
+            if (app.rows[rowIndex]) {
+              allObjects(app.rows[rowIndex], func);
+            }
+          } else {
+            // Handle all rows
+            Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
           }
-        } else {
-          // Handle all rows
-          Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
         }
-      }
 
-      function allObjects(row, func) {
-        func(row);
-        if (row.objects && row.objects.length) {
-          Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+        function allObjects(row, func) {
+          func(row);
+          if (row.objects && row.objects.length) {
+            Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+          }
         }
+        allThings((obj) => obj.requireds.length = 0);
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
+          if (sections) {
+            const process = (section) => {
+              if (section.cards && section.cards.length) {
+                Array.prototype.forEach.call(section.cards, (card) => {
+                  delete card.requirements;
+                });
+              }
+            };
+            if (rowIndex !== null) {
+              if (sections[rowIndex]) {
+                process(sections[rowIndex]);
+              }
+            } else {
+              Array.prototype.forEach.call(sections, process);
+            }
+            try {
+              window.wrappedJSObject.game.updateAfterToggle?.();
+            } catch (e) {
+              window.game.updateAfterToggle?.();
+            }
+          }
+        } catch (e) { }
       }
-      allThings((obj) => obj.requireds.length = 0);
     })();
   } catch (e) { }
 }
