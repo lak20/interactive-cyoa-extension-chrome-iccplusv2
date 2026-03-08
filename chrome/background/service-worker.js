@@ -27,6 +27,14 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
       await chrome.action.setBadgeText({ text: 'ON', tabId });
       break;
   }
+
+  // Relay all messages to the popup
+  try {
+    const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
+    if (popup) {
+      chrome.runtime.sendMessage(popup.id, message).catch(() => { });
+    }
+  } catch (e) { }
 });
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {

@@ -25,8 +25,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         updatePoints(message.points, sender.frameId);
         // After receiving points, get row information
         getCurrentTab().then((tab) => {
+          const target = { tabId: tab.id };
+          if (sender.frameId !== undefined) {
+            target.frameIds = [sender.frameId];
+          }
           chrome.scripting.executeScript({
-            target: { tabId: tab.id, frameIds: [sender.frameId] },
+            target: target,
             func: getRowsInfo,
             world: chrome.scripting.ExecutionWorld.MAIN
           });
@@ -109,8 +113,12 @@ function createRowActionButtons(row, index, frameId) {
   removeRowLimitsBtn.textContent = 'Remove Row Limit';
   removeRowLimitsBtn.onclick = () => {
     getCurrentTab().then((tab) => {
+      const target = { tabId: tab.id };
+      if (frameId !== undefined) {
+        target.frameIds = [frameId];
+      }
       chrome.scripting.executeScript({
-        target: { tabId: tab.id, frameIds: [frameId] },
+        target: target,
         func: removeRowLimits,
         args: [index],
         world: chrome.scripting.ExecutionWorld.MAIN
@@ -122,8 +130,12 @@ function createRowActionButtons(row, index, frameId) {
   removeRequirementsBtn.textContent = 'Remove Requirements';
   removeRequirementsBtn.onclick = () => {
     getCurrentTab().then((tab) => {
+      const target = { tabId: tab.id };
+      if (frameId !== undefined) {
+        target.frameIds = [frameId];
+      }
       chrome.scripting.executeScript({
-        target: { tabId: tab.id, frameIds: [frameId] },
+        target: target,
         func: removeRequirements,
         args: [index],
         world: chrome.scripting.ExecutionWorld.MAIN
@@ -135,8 +147,12 @@ function createRowActionButtons(row, index, frameId) {
   removeRandomnessBtn.textContent = 'Remove Randomness';
   removeRandomnessBtn.onclick = () => {
     getCurrentTab().then((tab) => {
+      const target = { tabId: tab.id };
+      if (frameId !== undefined) {
+        target.frameIds = [frameId];
+      }
       chrome.scripting.executeScript({
-        target: { tabId: tab.id, frameIds: [frameId] },
+        target: target,
         func: removeRandomness,
         args: [index],
         world: chrome.scripting.ExecutionWorld.MAIN
@@ -148,8 +164,12 @@ function createRowActionButtons(row, index, frameId) {
   toggleRequirementsBtn.textContent = 'Toggle Requirements';
   toggleRequirementsBtn.onclick = () => {
     getCurrentTab().then((tab) => {
+      const target = { tabId: tab.id };
+      if (frameId !== undefined) {
+        target.frameIds = [frameId];
+      }
       chrome.scripting.executeScript({
-        target: { tabId: tab.id, frameIds: [frameId] },
+        target: target,
         func: toggleAllRequirements,
         args: [index],
         world: chrome.scripting.ExecutionWorld.MAIN
@@ -209,8 +229,12 @@ function updatePoints(points, frameId = 0) {
         try {
           const value = parseFloat(valueElem.value);
           getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
             chrome.scripting.executeScript({
-              target: { tabId: tab.id, frameIds: [frameId] },
+              target: target,
               func: updatePoint,
               args: [index, value],
               world: chrome.scripting.ExecutionWorld.MAIN
@@ -232,8 +256,12 @@ function updatePoints(points, frameId = 0) {
         valueElem.value = newValue;
         try {
           getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
             chrome.scripting.executeScript({
-              target: { tabId: tab.id, frameIds: [frameId] },
+              target: target,
               func: updatePoint,
               args: [index, newValue],
               world: chrome.scripting.ExecutionWorld.MAIN
@@ -251,8 +279,12 @@ function updatePoints(points, frameId = 0) {
         valueElem.value = newValue;
         try {
           getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
             chrome.scripting.executeScript({
-              target: { tabId: tab.id, frameIds: [frameId] },
+              target: target,
               func: updatePoint,
               args: [index, newValue],
               world: chrome.scripting.ExecutionWorld.MAIN
