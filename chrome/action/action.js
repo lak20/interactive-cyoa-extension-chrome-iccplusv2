@@ -15,7 +15,7 @@ function scrollToMiddle() {
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const tab = await getCurrentTab();
 
-  if (!tab || !sender.tab || sender.tab.id === tab.id) {
+  if (!tab || message.tabId === tab.id || (sender.tab && sender.tab.id === tab.id)) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
       scrollToMiddle();

@@ -32,6 +32,7 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
   try {
     const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
     if (popup) {
+      message.tabId = tabId;
       chrome.runtime.sendMessage(popup.id, message).catch(() => { });
     }
   } catch (e) { }
@@ -41,6 +42,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   // Relay messages from pageScript to the popup
   const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
   if (popup) {
+    if (sender.tab) message.tabId = sender.tab.id;
     chrome.runtime.sendMessage(popup.id, message).catch(() => { });
   }
 });
