@@ -33,6 +33,10 @@
         {
           "version": "0.0.3.12",
           "update_link": "https://github.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/releases/download/0.0.3.12/CYOA.tool.iccplusv2.Firefox.xpi"
+        },
+        {
+          "version": "0.0.3.13",
+          "update_link": "https://github.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/releases/download/0.0.3.13/CYOA.tool.iccplusv2.Firefox.xpi"
         }
       ]
     }

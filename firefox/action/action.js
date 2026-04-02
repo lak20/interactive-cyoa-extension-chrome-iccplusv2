@@ -1,3 +1,7 @@
+const debugLog = document.getElementById('debug-log');
+window.onerror = function (msg) { debugLog.textContent += 'Err: ' + msg + '\n'; };
+window.onunhandledrejection = function (e) { debugLog.textContent += 'Rej: ' + e.reason + '\n'; };
+
 const pointsContainer = document.getElementById('points-container');
 const actionsContainer = document.getElementById('actions-container');
 
@@ -11,14 +15,15 @@ function scrollToMiddle() {
     }
   }, 0);
 }
+scrollToMiddle();
 
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  debugLog.textContent = 'Received msg: ' + message.type;
   const tab = await getCurrentTab();
 
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
-      scrollToMiddle();
     }
     switch (message.type) {
       case 'points':
@@ -841,8 +846,84 @@ function removeRequirements(rowIndex = null) {
 }
 
 async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await browser.tabs.query(queryOptions);
-  return tab;
+  try {
+    let tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    if (tabs && tabs.length > 0) return tabs[0];
+    tabs = await browser.tabs.query({ active: true });
+    return tabs ? tabs[0] : undefined;
+  } catch (e) {
+    let tabs = await browser.tabs.query({ active: true });
+    return tabs ? tabs[0] : undefined;
+  }
 }
+
+function injectedFetchData() {
+  let app = undefined;
+  try { app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app; } catch (e) { }
+  if (!app) try { app = document.querySelector('#app').__vue__.$store.state.app; } catch (e) { }
+  if (!app) try { app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data; } catch (e) { }
+  if (!app) try { app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data; } catch (e) { }
+  if (!app) try { app = window.wrappedJSObject.debugApp; } catch (e) { }
+  if (!app) try { app = window.debugApp; } catch (e) { }
+
+  let points = null;
+  let rows = null;
+
+  if (app && app.pointTypes) {
+    points = Array.from(app.pointTypes).map((point) => ({
+      name: point.name,
+      value: point.startingSum
+    }));
+  } else {
+    try {
+      const gamePoints = window.wrappedJSObject.game?.state?.points || window.game?.state?.points;
+      if (gamePoints) {
+        points = Object.entries(gamePoints).map(([name, value]) => ({ name, value }));
+      }
+    } catch (e) { }
+  }
+
+  if (app && app.rows) {
+    rows = Array.from(app.rows).map((row) => ({
+      name: row.name || row.title || '', id: row.id, hasObjects: !!(row.objects && row.objects.length)
+    }));
+  } else {
+    try {
+      const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
+      if (sections) {
+        rows = Array.from(sections).map((section, index) => ({ name: section.id || '', id: index, hasObjects: false }));
+      }
+    } catch (e) { }
+  }
+
+  return { points, rows };
+}
+
+async function refreshData() {
+  let tab = await getCurrentTab();
+  if (!tab) return;
+  try {
+    const results = await browser.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
+      func: injectedFetchData
+    });
+
+    for (const result of results) {
+      if (result.result && (result.result.points || result.result.rows)) {
+        const data = result.result;
+        if (data.points && data.points.length > 0) {
+          updatePoints(data.points, result.frameId);
+        }
+        if (data.rows && document.getElementById('row-actions-container').childNodes.length === 0 && data.rows.length > 0) {
+          updateRowControls(data.rows, result.frameId);
+        }
+        break;
+      }
+    }
+  } catch (e) {
+    if (document.getElementById('debug-log')) document.getElementById('debug-log').textContent = 'Refresh Err: ' + e.message;
+  }
+}
+
+refreshData();
+setInterval(refreshData, 500);
