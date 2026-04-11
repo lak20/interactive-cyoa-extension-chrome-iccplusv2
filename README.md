@@ -10,7 +10,7 @@ Browser extension for use with Interactive CYOAs. With this you can give yoursel
 
 This extension now also allows you to only remove row limits, requirements, and randomness from individual rows(this was such a massive pain to implement, mostly because of chrome but still). It still allows you to remove all row limits, requirements, and randomness everywhere if you so wish.
 
-Downloads available at https://github.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/releases
+Downloads available at https://github.com/lak20/interactive-cyoa-extension-chrome-iccplusv2/releases or on the right under releases.
 
 Publishing the chrome extension on the chrome web store would require me to pay google for a dev acount and that is not happening. Manual install available.
 Chrome version requires you to turn on developer mode in the extensions tab first. Then you download the .zip file extract it into an empty folder(can be named anything and placed in any reasonable place (don't put it into win32 please)). Then in the extension tab press Load unpacked and select the folder that you extracted it into.
