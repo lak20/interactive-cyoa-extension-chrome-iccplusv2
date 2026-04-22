@@ -1,7 +1,3 @@
-const debugLog = document.getElementById('debug-log');
-window.onerror = function (msg) { debugLog.textContent += 'Err: ' + msg + '\n'; };
-window.onunhandledrejection = function (e) { debugLog.textContent += 'Rej: ' + e.reason + '\n'; };
-
 const pointsContainer = document.getElementById('points-container');
 const actionsContainer = document.getElementById('actions-container');
 
@@ -15,15 +11,14 @@ function scrollToMiddle() {
     }
   }, 0);
 }
-scrollToMiddle();
 
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  debugLog.textContent = 'Received msg: ' + message.type;
   const tab = await getCurrentTab();
 
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
+      scrollToMiddle();
     }
     switch (message.type) {
       case 'points':
@@ -334,22 +329,43 @@ function updatePoint(index, value) {
         }
       }
       if (!app) {
-        // try window.game.state.points
+        // try window.game.state.points or window.playerState.metaResources
         try {
-          const pointTypes = window.wrappedJSObject.game.state.points ? Object.keys(window.wrappedJSObject.game.state.points) : Object.keys(window.game.state.points);
-          pointName = pointTypes[index];
-          if (pointName) {
-            try {
-              window.wrappedJSObject.game.state.points[pointName] = value;
-            } catch (e) {
-              window.game.state.points[pointName] = value;
+          let pointTypes = undefined;
+          let isGamePoints = false;
+          let isPlayerPoints = false;
+
+          if (window.wrappedJSObject.game?.state?.points || window.game?.state?.points) {
+            pointTypes = window.wrappedJSObject.game?.state?.points ? Object.keys(window.wrappedJSObject.game.state.points) : Object.keys(window.game.state.points);
+            isGamePoints = true;
+          } else if (window.wrappedJSObject.playerState?.metaResources || window.playerState?.metaResources) {
+            pointTypes = window.wrappedJSObject.playerState?.metaResources ? Object.keys(window.wrappedJSObject.playerState.metaResources) : Object.keys(window.playerState.metaResources);
+            isPlayerPoints = true;
+          }
+
+          if (pointTypes) {
+            pointName = pointTypes[index];
+            if (pointName) {
+              if (isGamePoints) {
+                try {
+                  window.wrappedJSObject.game.state.points[pointName] = value;
+                } catch (e) {
+                  window.game.state.points[pointName] = value;
+                }
+                try {
+                  window.wrappedJSObject.game.updateAfterToggle?.();
+                } catch (e) {
+                  window.game.updateAfterToggle?.();
+                }
+              } else if (isPlayerPoints) {
+                try {
+                  window.wrappedJSObject.playerState.metaResources[pointName] = value;
+                } catch (e) {
+                  window.playerState.metaResources[pointName] = value;
+                }
+              }
+              return;
             }
-            try {
-              window.wrappedJSObject.game.updateAfterToggle?.();
-            } catch (e) {
-              window.game.updateAfterToggle?.();
-            }
-            return;
           }
         } catch (e) { }
       }

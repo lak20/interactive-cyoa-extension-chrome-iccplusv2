@@ -77,6 +77,15 @@ function pageScript(extId) {
               }
             } catch (e) { }
           }
+          if (!app) {
+            // try window.playerState.metaResources
+            try {
+              if (window.playerState?.metaResources) {
+                hasGameState = true;
+                app = true;
+              }
+            } catch (e) { }
+          }
 
           if (!app) return;
 
@@ -121,6 +130,14 @@ function pageScript(extId) {
                 name: name,
                 value: value
               }));
+            } else {
+              const playerPoints = window.playerState?.metaResources;
+              if (playerPoints) {
+                points = Object.entries(playerPoints).map(([name, value]) => ({
+                  name: name,
+                  value: value
+                }));
+              }
             }
           } catch (e) { }
         }

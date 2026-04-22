@@ -39,6 +39,12 @@ try {
             app = window.wrappedJSObject.game?.state?.points || window.game?.state?.points;
           } catch (e) { }
         }
+        if (!app) {
+          // try window.playerState.metaResources
+          try {
+            app = window.wrappedJSObject.playerState?.metaResources || window.playerState?.metaResources;
+          } catch (e) { }
+        }
         if (!app) return;
 
         clearInterval(attachInterval);
@@ -98,6 +104,14 @@ try {
               name: name,
               value: value
             }));
+          } else {
+            const playerPoints = window.wrappedJSObject.playerState?.metaResources || window.playerState?.metaResources;
+            if (playerPoints) {
+              points = Object.entries(playerPoints).map(([name, value]) => ({
+                name: name,
+                value: value
+              }));
+            }
           }
         } catch (e) { }
       }

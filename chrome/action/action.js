@@ -340,12 +340,21 @@ function updatePoint(index, value) {
       if (!app) {
         // try window.game.state.points
         try {
-          const pointTypes = Object.keys(window.game.state.points);
-          pointName = pointTypes[index];
-          if (pointName) {
-            window.game.state.points[pointName] = value;
-            window.game.updateAfterToggle?.();
-            return;
+          if (window.game?.state?.points) {
+            const pointTypes = Object.keys(window.game.state.points);
+            pointName = pointTypes[index];
+            if (pointName) {
+              window.game.state.points[pointName] = value;
+              window.game.updateAfterToggle?.();
+              return;
+            }
+          } else if (window.playerState?.metaResources) {
+            const pointTypes = Object.keys(window.playerState.metaResources);
+            pointName = pointTypes[index];
+            if (pointName) {
+              window.playerState.metaResources[pointName] = value;
+              return;
+            }
           }
         } catch (e) { }
       }
