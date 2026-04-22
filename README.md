@@ -1,6 +1,7 @@
 This is a not so minimum effort fork of the original CYOA assist tool available at https://github.com/peteresculley/interactive-cyoa-extension-chrome. 
 
 Now works on mobile(android)... atleast the firefox version does, I don't think you can load extensions into mobile chrome so i didn't bother with it, also i only tested this on android, im not aware of a way to load extensions on firefox ios nor do i have an iphone to test it.
+Also I made a UserStyle that makes it slightly less likely that poins will display outside the screen. https://userstyles.world/style/27407/default-slug (you will need some kind of userstyle manager I use stylus) This is separate from the extension and both will work fine if used separately.
 
 Now also supports point manipulation and removing row limits and requirements for DW's new engine.
 
