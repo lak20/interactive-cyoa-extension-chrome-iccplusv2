@@ -20,30 +20,32 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       actionsContainer.style.display = 'flex';
       scrollToMiddle();
     }
+    const frameId = message.frameId !== undefined ? message.frameId : sender.frameId;
     switch (message.type) {
       case 'points':
-        updatePoints(message.points, sender.frameId);
+        updatePoints(message.points, frameId);
         // After receiving points, get row information
         getCurrentTab().then((tab) => {
           const target = { tabId: tab.id };
-          if (sender.frameId !== undefined) {
-            target.frameIds = [sender.frameId];
+          if (frameId !== undefined) {
+            target.frameIds = [frameId];
           }
           chrome.scripting.executeScript({
             target: target,
             func: getRowsInfo,
+            args: [chrome.runtime.id],
             world: chrome.scripting.ExecutionWorld.MAIN
           });
         });
         break;
       case 'rows':
-        updateRowControls(message.rows, sender.frameId);
+        updateRowControls(message.rows, frameId);
         break;
     }
   }
 });
 
-function getRowsInfo() {
+function getRowsInfo(extId) {
   try {
     (() => {
       let app = undefined;
@@ -87,7 +89,11 @@ function getRowsInfo() {
       }
 
       if (rows) {
-        chrome.runtime.sendMessage({ type: 'rows', rows });
+        if (extId) {
+          chrome.runtime.sendMessage(extId, { type: 'rows', rows });
+        } else {
+          chrome.runtime.sendMessage({ type: 'rows', rows });
+        }
       }
     })();
   } catch (e) { }

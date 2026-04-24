@@ -33,6 +33,7 @@ chrome.runtime.onMessageExternal.addListener(async (message, sender, sendRespons
     const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
     if (popup) {
       message.tabId = tabId;
+      message.frameId = sender.frameId;
       chrome.runtime.sendMessage(popup.id, message).catch(() => { });
     }
   } catch (e) { }
@@ -43,6 +44,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const [popup] = await chrome.runtime.getContexts({ contextTypes: ['POPUP'] });
   if (popup) {
     if (sender.tab) message.tabId = sender.tab.id;
+    message.frameId = sender.frameId;
     chrome.runtime.sendMessage(popup.id, message).catch(() => { });
   }
 });
