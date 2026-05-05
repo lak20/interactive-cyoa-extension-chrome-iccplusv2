@@ -250,8 +250,8 @@ function updatePoints(points, frameId = 0) {
       };
 
       // Create button container
-      const buttonContainer = document.createElement('div');
-      buttonContainer.className = 'point-button-container';
+      const rightbuttonContainer = document.createElement('div');
+      rightbuttonContainer.className = 'point-button-container';
 
       // Add +5 button
       const add5Btn = document.createElement('button');
@@ -299,12 +299,114 @@ function updatePoints(points, frameId = 0) {
         } catch (e) { }
       };
 
-      buttonContainer.appendChild(add5Btn);
-      buttonContainer.appendChild(add10Btn);
+      // Add 2x button
+      const mul2Btn = document.createElement('button');
+      mul2Btn.textContent = '2x';
+      mul2Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue * 2;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
+            chrome.scripting.executeScript({
+              target: target,
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      rightbuttonContainer.appendChild(add5Btn);
+      rightbuttonContainer.appendChild(add10Btn);
+      rightbuttonContainer.appendChild(mul2Btn);
+
+      // Create left button container
+      const leftButtonContainer = document.createElement('div');
+      leftButtonContainer.className = 'point-button-container left';
+
+      // Add /2 button
+      const div2Btn = document.createElement('button');
+      div2Btn.textContent = '/2';
+      div2Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue / 2;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
+            chrome.scripting.executeScript({
+              target: target,
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      // Add -10 button
+      const sub10Btn = document.createElement('button');
+      sub10Btn.textContent = '-10';
+      sub10Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue - 10;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
+            chrome.scripting.executeScript({
+              target: target,
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      // Add -5 button
+      const sub5Btn = document.createElement('button');
+      sub5Btn.textContent = '-5';
+      sub5Btn.onclick = () => {
+        const currentValue = parseFloat(valueElem.value) || 0;
+        const newValue = currentValue - 5;
+        valueElem.value = newValue;
+        try {
+          getCurrentTab().then((tab) => {
+            const target = { tabId: tab.id };
+            if (frameId !== undefined) {
+              target.frameIds = [frameId];
+            }
+            chrome.scripting.executeScript({
+              target: target,
+              func: updatePoint,
+              args: [index, newValue],
+              world: chrome.scripting.ExecutionWorld.MAIN
+            });
+          });
+        } catch (e) { }
+      };
+
+      leftButtonContainer.appendChild(div2Btn);
+      leftButtonContainer.appendChild(sub10Btn);
+      leftButtonContainer.appendChild(sub5Btn);
 
       child.appendChild(nameElem);
+      child.appendChild(leftButtonContainer);
       child.appendChild(valueElem);
-      child.appendChild(buttonContainer);
+      child.appendChild(rightbuttonContainer);
       pointsContainer.appendChild(child);
     }
 
