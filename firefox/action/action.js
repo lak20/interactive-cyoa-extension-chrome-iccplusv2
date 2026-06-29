@@ -18,7 +18,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (!tab || !sender.tab || sender.tab.id === tab.id) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
-      scrollToMiddle();
+      //scrollToMiddle();
     }
     switch (message.type) {
       case 'points':
@@ -79,7 +79,8 @@ function getRowsInfo() {
           return {
             name: row.name || row.title || '',
             id: row.id,
-            hasObjects: !!(row.objects && row.objects.length)
+            hasObjects: !!(row.objects && row.objects.length),
+            allowedChoices: row.allowedChoices !== undefined ? row.allowedChoices : 0
           };
         }
         rows = Array.from(app.rows).map(collectRowInfo);
@@ -91,7 +92,8 @@ function getRowsInfo() {
             rows = Array.from(sections).map((section, index) => ({
               name: section.id || '',
               id: index,
-              hasObjects: false
+              hasObjects: false,
+              maxSelections: section.maxSelections !== undefined ? section.maxSelections : 0
             }));
           }
         } catch (e) { }
@@ -107,6 +109,23 @@ function getRowsInfo() {
 function createRowActionButtons(row, index, frameId) {
   const container = document.createElement('div');
   container.className = 'row-actions';
+
+  // Editable row limit input
+  const rowLimitInput = document.createElement('input');
+  rowLimitInput.type = 'number';
+  rowLimitInput.className = 'row-limit-input';
+  rowLimitInput.title = 'Row Limit';
+  rowLimitInput.value = row.allowedChoices !== undefined ? row.allowedChoices : (row.maxSelections !== undefined ? row.maxSelections : 0);
+  rowLimitInput.onchange = () => {
+    const newLimit = parseInt(rowLimitInput.value, 10) || 0;
+    getCurrentTab().then((tab) => {
+      browser.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [frameId] },
+        func: setRowLimit,
+        args: [index, newLimit]
+      });
+    });
+  };
 
   const rowNameElem = document.createElement('div');
   rowNameElem.className = 'row-name';
@@ -177,6 +196,7 @@ function createRowActionButtons(row, index, frameId) {
   rightContainer.appendChild(toggleRequirementsBtn);
 
   // Add all elements to main container
+  container.appendChild(rowLimitInput);
   container.appendChild(rowNameElem);
   container.appendChild(leftContainer);
   container.appendChild(rightContainer);
@@ -185,6 +205,20 @@ function createRowActionButtons(row, index, frameId) {
 
 function updateRowControls(rows, frameId) {
   const rowActionsContainer = document.getElementById('row-actions-container');
+
+  // If rows already exist with the same count, just update values in-place
+  const existingRows = rowActionsContainer.querySelectorAll('.row-actions');
+  if (existingRows.length === rows.length && rows.length > 0) {
+    rows.forEach((row, index) => {
+      const input = existingRows[index].querySelector('.row-limit-input');
+      if (input && input !== document.activeElement) {
+        const newValue = row.allowedChoices !== undefined ? row.allowedChoices : (row.maxSelections !== undefined ? row.maxSelections : 0);
+        input.value = newValue;
+      }
+    });
+    return;
+  }
+
   rowActionsContainer.innerHTML = ''; // Clear existing buttons
 
   if (rows.length === 0) {
@@ -543,6 +577,61 @@ function removeRowLimits(rowIndex = null) {
                 delete section.maxSelections;
               });
             }
+            try {
+              window.wrappedJSObject.game.updateAfterToggle?.();
+            } catch (e) {
+              window.game.updateAfterToggle?.();
+            }
+          }
+        } catch (e) { }
+      }
+    })();
+  } catch (e) { }
+}
+
+function setRowLimit(rowIndex, value) {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').wrappedJSObject.__vue__.$store.state.app;
+      } catch (e) { }
+      if (!app) {
+        try {
+          app = document.querySelector('#app').__vue__.$store.state.app;
+        } catch (e) { }
+      }
+      if (!app) {
+        // try nuxt + pinia (ltouroumov version)
+        try {
+          app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+        } catch (e) {
+          try {
+            app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          } catch (e) { }
+        }
+      }
+      if (!app) {
+        // try svelte
+        try {
+          app = window.wrappedJSObject.debugApp;
+        } catch (e) { }
+        if (!app) {
+          app = window.debugApp;
+        }
+      }
+
+      if (app && app.rows) {
+        if (app.rows[rowIndex]) {
+          app.rows[rowIndex].allowedChoices = value;
+        }
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
+          if (sections && sections[rowIndex]) {
+            sections[rowIndex].maxSelections = value;
             try {
               window.wrappedJSObject.game.updateAfterToggle?.();
             } catch (e) {
@@ -983,13 +1072,14 @@ function injectedFetchData() {
 
   if (app && app.rows) {
     rows = Array.from(app.rows).map((row) => ({
-      name: row.name || row.title || '', id: row.id, hasObjects: !!(row.objects && row.objects.length)
+      name: row.name || row.title || '', id: row.id, hasObjects: !!(row.objects && row.objects.length),
+      allowedChoices: row.allowedChoices !== undefined ? row.allowedChoices : 0
     }));
   } else {
     try {
       const sections = window.wrappedJSObject.game?.data?.sections || window.game?.data?.sections;
       if (sections) {
-        rows = Array.from(sections).map((section, index) => ({ name: section.id || '', id: index, hasObjects: false }));
+        rows = Array.from(sections).map((section, index) => ({ name: section.id || '', id: index, hasObjects: false, maxSelections: section.maxSelections !== undefined ? section.maxSelections : 0 }));
       }
     } catch (e) { }
   }
