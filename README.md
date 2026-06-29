@@ -6,7 +6,7 @@ Now works on mobile(android)... atleast the firefox version does, I don't think 
 Also I made a UserStyle that makes it slightly less likely that poins will display outside the screen. https://userstyles.world/style/27407/default-slug (you will need some kind of userstyle manager I use stylus) This is separate from the extension and both will work fine if used separately.
 
 Now also supports point manipulation and removing row limits and requirements for DW's new engine.
-
+Also supports Mamick's CYOAs https://mamick.neocities.org/.
 Now also kinda supports the ltouroumov version. Only point manipulation works in the ltouroumov version i currently don't know how to fix it. :(
 
 Browser extension for use with Interactive CYOAs. With this you can give yourself as many points as you want, you can remove some other kinds of restrictions that CYOAs place upon you and allows you to "remove" random choices and chose which outcome you want.
