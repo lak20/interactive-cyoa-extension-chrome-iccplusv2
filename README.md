@@ -7,7 +7,7 @@ Also I made a UserStyle that makes it slightly less likely that poins will displ
 
 Now also supports point manipulation and removing row limits and requirements for DW's new engine.
 Also supports Mamick's CYOAs https://mamick.neocities.org/.
-Now also kinda supports the ltouroumov version. Only point manipulation works in the ltouroumov version i currently don't know how to fix it. :(
+Also kinda supports the ltouroumov version. Only point manipulation works in the ltouroumov version i currently don't know how to fix it. :(
 
 Browser extension for use with Interactive CYOAs. With this you can give yourself as many points as you want, you can remove some other kinds of restrictions that CYOAs place upon you and allows you to "remove" random choices and chose which outcome you want.
 
