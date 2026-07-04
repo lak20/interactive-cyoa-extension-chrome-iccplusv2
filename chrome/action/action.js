@@ -53,10 +53,12 @@ function getRowsInfo(extId) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -473,10 +475,12 @@ function updatePoint(index, value) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -509,6 +513,21 @@ function updatePoint(index, value) {
       if (app) {
         app.pointTypes[index].startingSum = value;
       }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
+          }
+        } catch (e) { }
+      }
     })()
   } catch (e) { }
 }
@@ -534,10 +553,12 @@ function removeRowLimits(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -586,6 +607,21 @@ function removeRowLimits(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -598,10 +634,12 @@ function setRowLimit(rowIndex, value) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -620,6 +658,21 @@ function setRowLimit(rowIndex, value) {
           if (sections && sections[rowIndex]) {
             sections[rowIndex].maxSelections = value;
             window.game.updateAfterToggle?.();
+          }
+        } catch (e) { }
+      }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
           }
         } catch (e) { }
       }
@@ -648,10 +701,12 @@ function removeRandomness(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -678,6 +733,21 @@ function removeRandomness(rowIndex = null) {
         }
       }
       allThings((obj) => obj.isInfoRow && (obj.isInfoRow = false));
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -729,10 +799,12 @@ function toggleAllRequirements(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -795,6 +867,21 @@ function toggleAllRequirements(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -807,10 +894,12 @@ function showAllRequirements(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -873,6 +962,21 @@ function showAllRequirements(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
+          }
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -885,10 +989,12 @@ function removeRequirements(rowIndex = null) {
         // try vue
         app = document.querySelector('#app').__vue__.$store.state.app;
       } catch (e) { }
+      let isNuxt = false;
       if (!app) {
         try {
           // try nuxt (ltouroumov version)
           app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) { }
       }
       if (!app) {
@@ -936,6 +1042,21 @@ function removeRequirements(rowIndex = null) {
               Array.prototype.forEach.call(sections, process);
             }
             window.game.updateAfterToggle?.();
+          }
+        } catch (e) { }
+      }
+      if (isNuxt) {
+        try {
+          const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project");
+          if (s && s.store && s.store.file && s.store.file.data) {
+            const raw = s.store;
+            const d = raw.file.data;
+            const newData = Object.assign({}, d, {
+              rows: (d.rows || []).slice(),
+              pointTypes: (d.pointTypes || []).slice()
+            });
+            const newFile = Object.assign({}, raw.file, { data: newData });
+            s.store = Object.assign({}, raw, { file: newFile });
           }
         } catch (e) { }
       }

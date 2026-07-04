@@ -51,15 +51,18 @@ function getRowsInfo() {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -423,15 +426,18 @@ function updatePoint(index, value) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -489,6 +495,14 @@ function updatePoint(index, value) {
       if (app) {
         app.pointTypes[index].startingSum = value;
       }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })()
   } catch (e) { }
 }
@@ -518,15 +532,18 @@ function removeRowLimits(rowIndex = null) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -585,6 +602,14 @@ function removeRowLimits(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -640,6 +665,14 @@ function setRowLimit(rowIndex, value) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -669,15 +702,18 @@ function removeRandomness(rowIndex = null) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -710,6 +746,14 @@ function removeRandomness(rowIndex = null) {
         }
       }
       allThings((obj) => obj.isInfoRow && (obj.isInfoRow = false));
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -763,15 +807,18 @@ function toggleAllRequirements(rowIndex = null) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -844,6 +891,14 @@ function toggleAllRequirements(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -861,15 +916,18 @@ function showAllRequirements(rowIndex = null) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -942,6 +1000,14 @@ function showAllRequirements(rowIndex = null) {
           }
         } catch (e) { }
       }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
     })();
   } catch (e) { }
 }
@@ -959,15 +1025,18 @@ function removeRequirements(rowIndex = null) {
           app = document.querySelector('#app').__vue__.$store.state.app;
         } catch (e) { }
       }
+      let isNuxt = false;
       if (!app) {
         // try nuxt + pinia (ltouroumov version)
         try {
           // Try with wrappedJSObject first
           app = document.getElementById("__nuxt").wrappedJSObject.__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
         } catch (e) {
           try {
             // Fallback to without wrappedJSObject
             app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+            isNuxt = true;
           } catch (e) { }
         }
       }
@@ -1026,6 +1095,14 @@ function removeRequirements(rowIndex = null) {
               window.game.updateAfterToggle?.();
             }
           }
+        } catch (e) { }
+      }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
         } catch (e) { }
       }
     })();
