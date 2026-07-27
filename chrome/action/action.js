@@ -12,13 +12,27 @@ function scrollToMiddle() {
   }, 0);
 }
 
+if (actionsContainer && actionsContainer.style.display !== 'flex') {
+  actionsContainer.style.display = 'flex';
+}
+
+getCurrentTab().then((tab) => {
+  if (tab && tab.id) {
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: getRowsInfo,
+      args: [chrome.runtime.id],
+      world: chrome.scripting.ExecutionWorld.MAIN
+    });
+  }
+}).catch(() => { });
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const tab = await getCurrentTab();
 
   if (!tab || message.tabId === tab.id || (sender.tab && sender.tab.id === tab.id)) {
     if (actionsContainer.style.display !== 'flex') {
       actionsContainer.style.display = 'flex';
-      //scrollToMiddle();
     }
     const frameId = message.frameId !== undefined ? message.frameId : sender.frameId;
     switch (message.type) {
@@ -65,15 +79,22 @@ function getRowsInfo(extId) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       let rows;
       if (app && app.rows) {
         function collectRowInfo(row) {
+          const perks = row.perks || row.objects || row.cards;
           return {
-            name: row.name || row.title || '',
-            id: row.id,
-            hasObjects: !!(row.objects && row.objects.length),
-            allowedChoices: row.allowedChoices !== undefined ? row.allowedChoices : 0
+            name: row.title || row.name || row.uid || row.id || '',
+            id: row.uid || row.id,
+            hasObjects: !!(perks && (Array.isArray(perks) ? perks.length : Object.keys(perks).length)),
+            allowedChoices: row.maxChosen !== undefined ? row.maxChosen : (row.allowedChoices !== undefined ? row.allowedChoices : (row.maxSelections !== undefined ? row.maxSelections : 0))
           };
         }
         rows = Array.from(app.rows).map(collectRowInfo);
@@ -227,6 +248,7 @@ function createRowActionButtons(row, index, frameId) {
 
 function updateRowControls(rows, frameId) {
   const rowActionsContainer = document.getElementById('row-actions-container');
+  if (!rowActionsContainer) return;
 
   // If rows already exist with the same count, just update values in-place
   const existingRows = rowActionsContainer.querySelectorAll('.row-actions');
@@ -488,6 +510,27 @@ function updatePoint(index, value) {
         app = window.debugApp;
       }
 
+      let vue3App = undefined;
+      try {
+        vue3App = window.__VUE3_ICC_APP__;
+      } catch (e) { }
+
+      if (vue3App && vue3App.rows && vue3App.rows.length > 0) {
+        try {
+          const rows = vue3App.rows;
+          const isDb = window.location.href.includes('/dragonballs/');
+          const targetRow = isDb ? rows[0] : rows[rows.length - 1];
+          if (targetRow && targetRow.perks && targetRow.perks.length > 0) {
+            const perks = targetRow.perks;
+            const targetPerk = isDb ? perks[0] : perks[perks.length - 1];
+            if (targetPerk && targetPerk.cost && targetPerk.cost[index]) {
+              targetPerk.cost[index].value = -value;
+              return;
+            }
+          }
+        } catch (e) { }
+      }
+
       if (!app) {
         // try window.game.state.points
         try {
@@ -565,6 +608,12 @@ function removeRowLimits(rowIndex = null) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       if (app && app.rows) {
         function allThings(func) {
@@ -581,12 +630,16 @@ function removeRowLimits(rowIndex = null) {
 
         function allObjects(row, func) {
           func(row);
-          if (row.objects && row.objects.length) {
-            row.objects.forEach((row) => allObjects(row, func));
+          const items = row.perks || row.objects || row.cards;
+          if (items && items.length) {
+            Array.prototype.forEach.call(items, (child) => allObjects(child, func));
           }
         }
 
-        allThings((obj) => obj.allowedChoices = 0);
+        allThings((obj) => {
+          if (obj.maxChosen !== undefined) obj.maxChosen = 0;
+          obj.allowedChoices = 0;
+        });
       } else {
         // try window.game.data.sections
         try {
@@ -646,9 +699,16 @@ function setRowLimit(rowIndex, value) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       if (app && app.rows) {
         if (app.rows[rowIndex]) {
+          if (app.rows[rowIndex].maxChosen !== undefined) app.rows[rowIndex].maxChosen = value;
           app.rows[rowIndex].allowedChoices = value;
         }
       } else {
@@ -713,6 +773,12 @@ function removeRandomness(rowIndex = null) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       function allThings(func) {
         if (rowIndex !== null) {
@@ -728,8 +794,9 @@ function removeRandomness(rowIndex = null) {
 
       function allObjects(row, func) {
         func(row);
-        if (row.objects && row.objects.length) {
-          row.objects.forEach((row) => allObjects(row, func));
+        const items = row.perks || row.objects || row.cards;
+        if (items && items.length) {
+          Array.prototype.forEach.call(items, (child) => allObjects(child, func));
         }
       }
       allThings((obj) => obj.isInfoRow && (obj.isInfoRow = false));
@@ -811,6 +878,12 @@ function toggleAllRequirements(rowIndex = null) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       if (app && app.rows) {
         function allThings(func) {
@@ -827,18 +900,39 @@ function toggleAllRequirements(rowIndex = null) {
 
         function allObjects(row, func) {
           func(row);
-          if (row.objects && row.objects.length) {
-            Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+          const items = row.perks || row.objects || row.cards;
+          if (items && items.length) {
+            Array.prototype.forEach.call(items, (child) => allObjects(child, func));
           }
         }
 
-        allThings((obj) => {
-          if (obj.requireds && obj.requireds.length > 0) {
-            // Toggle showRequired for all requirements in this object
-            Array.prototype.forEach.call(obj.requireds, (req) => {
-              req.showRequired = !req.showRequired;
-            });
+        function getRequirementItems(obj) {
+          const req = obj.requirement || obj.requireds || obj.requirements;
+          if (!req) return [];
+          const items = [];
+          if (Array.isArray(req)) {
+            items.push(...req);
+          } else if (typeof req === 'object') {
+            if (Array.isArray(req.and)) items.push(...req.and);
+            if (Array.isArray(req.or)) items.push(...req.or);
+            if (!req.and && !req.or) items.push(req);
           }
+          return items;
+        }
+
+        allThings((obj) => {
+          const reqItems = getRequirementItems(obj);
+          reqItems.forEach((req) => {
+            if (req.showRequired !== undefined) {
+              req.showRequired = !req.showRequired;
+            }
+            if (req.flags && typeof req.flags === 'object') {
+              req.flags.hidden = !req.flags.hidden;
+            }
+            if (req.showRequired === undefined && (!req.flags || req.flags.hidden === undefined)) {
+              req.showRequired = false;
+            }
+          });
         });
       } else {
         // try window.game.data.sections
@@ -906,6 +1000,12 @@ function showAllRequirements(rowIndex = null) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       if (app && app.rows) {
         function allThings(func) {
@@ -922,18 +1022,34 @@ function showAllRequirements(rowIndex = null) {
 
         function allObjects(row, func) {
           func(row);
-          if (row.objects && row.objects.length) {
-            Array.prototype.forEach.call(row.objects, (row) => allObjects(row, func));
+          const items = row.perks || row.objects || row.cards;
+          if (items && items.length) {
+            Array.prototype.forEach.call(items, (child) => allObjects(child, func));
           }
         }
 
-        allThings((obj) => {
-          if (obj.requireds && obj.requireds.length > 0) {
-            // Set showRequired to true for all requirements in this object
-            Array.prototype.forEach.call(obj.requireds, (req) => {
-              req.showRequired = true;
-            });
+        function getRequirementItems(obj) {
+          const req = obj.requirement || obj.requireds || obj.requirements;
+          if (!req) return [];
+          const items = [];
+          if (Array.isArray(req)) {
+            items.push(...req);
+          } else if (typeof req === 'object') {
+            if (Array.isArray(req.and)) items.push(...req.and);
+            if (Array.isArray(req.or)) items.push(...req.or);
+            if (!req.and && !req.or) items.push(req);
           }
+          return items;
+        }
+
+        allThings((obj) => {
+          const reqItems = getRequirementItems(obj);
+          reqItems.forEach((req) => {
+            req.showRequired = true;
+            if (req.flags && typeof req.flags === 'object') {
+              req.flags.hidden = false;
+            }
+          });
         });
       } else {
         // try window.game.data.sections
@@ -1001,6 +1117,12 @@ function removeRequirements(rowIndex = null) {
         // try svelte
         app = window.debugApp;
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
 
       if (app && app.rows) {
         function allThings(func) {
@@ -1017,11 +1139,30 @@ function removeRequirements(rowIndex = null) {
 
         function allObjects(row, func) {
           func(row);
-          if (row.objects && row.objects.length) {
-            row.objects.forEach((row) => allObjects(row, func));
+          const items = row.perks || row.objects || row.cards;
+          if (items && items.length) {
+            Array.prototype.forEach.call(items, (child) => allObjects(child, func));
           }
         }
-        allThings((obj) => obj.requireds ? obj.requireds = [] : undefined);
+
+        allThings((obj) => {
+          if (obj.requirement) {
+            if (typeof obj.requirement === 'object') {
+              if (Array.isArray(obj.requirement.and)) obj.requirement.and.length = 0;
+              if (Array.isArray(obj.requirement.or)) obj.requirement.or.length = 0;
+            }
+            if (Array.isArray(obj.requirement)) obj.requirement.length = 0;
+            delete obj.requirement;
+          }
+          if (obj.requireds) {
+            if (Array.isArray(obj.requireds)) obj.requireds.length = 0;
+            delete obj.requireds;
+          }
+          if (obj.requirements) {
+            if (Array.isArray(obj.requirements)) obj.requirements.length = 0;
+            delete obj.requirements;
+          }
+        });
       } else {
         // try window.game.data.sections
         try {

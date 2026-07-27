@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Interactive CYOA assist tool for icc+v2",
-  "version": "0.0.3.17",
+  "version": "0.0.3.19",
   "browser_specific_settings": {
     "gecko": {
       "id": "interactiveassisttoolsvelte@cyoa",
@@ -54,6 +54,16 @@
       "*"
     ]
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content/inject-main-world.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
   "description": "A tool to assist filling out interactive CYOAs made with the Interactive CYOA creator",
   "author": "lak20",
   "short_name": "CYOA tool svelte"

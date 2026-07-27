@@ -1,5 +1,21 @@
 try {
   (() => {
+    // Frame-safe injection of main-world scanner script
+    function injectMainWorld() {
+      try {
+        const target = document.head || document.documentElement || document.body;
+        if (target) {
+          const script = document.createElement('script');
+          script.src = browser.runtime.getURL('content/inject-main-world.js');
+          target.appendChild(script);
+          script.remove();
+        } else {
+          document.addEventListener('DOMContentLoaded', injectMainWorld, { once: true });
+        }
+      } catch (e) { }
+    }
+    injectMainWorld();
+
     const attachInterval = setInterval(() => {
       try {
         let app = undefined;
@@ -31,6 +47,15 @@ try {
           } catch (e) { }
           if (!app) {
             app = window.debugApp;
+          }
+        }
+        if (!app) {
+          // try vue 3 custom
+          try {
+            app = window.wrappedJSObject.__VUE3_ICC_APP__;
+          } catch (e) { }
+          if (!app) {
+            app = window.__VUE3_ICC_APP__;
           }
         }
         if (!app) {
@@ -88,14 +113,55 @@ try {
           app = window.debugApp;
         }
       }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.wrappedJSObject.__VUE3_ICC_APP__;
+        } catch (e) { }
+        if (!app) {
+          app = window.__VUE3_ICC_APP__;
+        }
+      }
 
       let points;
-      if (app && app.pointTypes) {
+      let vue3App = undefined;
+      try {
+        vue3App = window.wrappedJSObject.__VUE3_ICC_APP__ || window.__VUE3_ICC_APP__;
+      } catch (e) { }
+
+      if (vue3App && vue3App.rows && vue3App.rows.length > 0) {
+        try {
+          const rows = vue3App.rows;
+          const isDragonballs = window.location.href.includes('/dragonballs/');
+          const targetRow = isDragonballs ? rows[0] : rows[rows.length - 1];
+          if (targetRow && targetRow.perks && targetRow.perks.length > 0) {
+            const perks = targetRow.perks;
+            const targetPerk = isDragonballs ? perks[0] : perks[perks.length - 1];
+            if (targetPerk && targetPerk.cost) {
+              const costArr = targetPerk.cost;
+              const len = costArr.length || 0;
+              const pts = [];
+              for (let i = 0; i < len; i++) {
+                const item = costArr[i];
+                if (item) {
+                  pts.push({
+                    name: String(item.name || ''),
+                    value: item.value !== undefined ? -Number(item.value) : 0
+                  });
+                }
+              }
+              if (pts.length > 0) points = pts;
+            }
+          }
+        } catch (e) { }
+      }
+
+      if (!points && app && app.pointTypes) {
         points = Array.prototype.map.call(app.pointTypes, (point) => ({
           name: point.name,
           value: point.startingSum
         }));
-      } else {
+      } else if (!points) {
         // try window.game.state.points
         try {
           const gamePoints = window.wrappedJSObject.game?.state?.points || window.game?.state?.points;
