@@ -12,8 +12,53 @@ function scrollToMiddle() {
   }, 0);
 }
 
-if (actionsContainer && actionsContainer.style.display !== 'flex') {
-  actionsContainer.style.display = 'flex';
+const addPointContainer = document.getElementById('add-point-container');
+const customPointNameInput = document.getElementById('custom-point-name-input');
+const addCustomPointBtn = document.getElementById('add-custom-point-button');
+
+function checkVue3EngineAndShowAddPoint() {
+  getCurrentTab().then((tab) => {
+    if (tab && tab.id) {
+      browser.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: () => !!(window.wrappedJSObject.__VUE3_ICC_APP__ || window.__VUE3_ICC_APP__)
+      }).then((results) => {
+        if (results && results.some((r) => r.result)) {
+          if (addPointContainer) addPointContainer.style.display = 'flex';
+        }
+      }).catch(() => { });
+    }
+  });
+}
+checkVue3EngineAndShowAddPoint();
+
+function triggerAddCustomPoint(frameId) {
+  if (!customPointNameInput) return;
+  const name = customPointNameInput.value.trim();
+  if (!name) return;
+
+  getCurrentTab().then((tab) => {
+    const target = { tabId: tab.id };
+    if (frameId !== undefined) target.frameIds = [frameId];
+    else target.allFrames = true;
+
+    browser.scripting.executeScript({
+      target: target,
+      func: addCustomPointType,
+      args: [name]
+    }).then(() => {
+      customPointNameInput.value = '';
+    }).catch(() => { });
+  });
+}
+
+if (addCustomPointBtn) {
+  addCustomPointBtn.onclick = () => triggerAddCustomPoint();
+}
+if (customPointNameInput) {
+  customPointNameInput.onkeydown = (e) => {
+    if (e.key === 'Enter') triggerAddCustomPoint();
+  };
 }
 
 // Request rows immediately when popup opens
@@ -556,6 +601,45 @@ function updatePoint(index, value) {
         } catch (e) { }
       }
     })()
+  } catch (e) { }
+}
+
+function addCustomPointType(pointName) {
+  try {
+    let vue3App = undefined;
+    try {
+      vue3App = window.wrappedJSObject.__VUE3_ICC_APP__ || window.__VUE3_ICC_APP__;
+    } catch (e) { }
+
+    if (vue3App && vue3App.rows && vue3App.rows.length > 0) {
+      try {
+        const rows = vue3App.rows;
+        const isDb = window.location.href.includes('/dragonballs/');
+        const targetRow = isDb ? rows[0] : rows[rows.length - 1];
+        if (targetRow && targetRow.perks && targetRow.perks.length > 0) {
+          const perks = targetRow.perks;
+          const targetPerk = isDb ? perks[0] : perks[perks.length - 1];
+          if (targetPerk) {
+            if (!targetPerk.cost || !Array.isArray(targetPerk.cost)) {
+              targetPerk.cost = [];
+            }
+            const exists = targetPerk.cost.some((c) => c && c.name && c.name.toLowerCase() === pointName.toLowerCase());
+            if (!exists) {
+              targetPerk.cost.push({ name: pointName, value: 0, show: false });
+            }
+            return;
+          }
+        }
+      } catch (e) { }
+
+      try {
+        const script = document.createElement('script');
+        script.textContent = `try { const app = window.__VUE3_ICC_APP__; if (app && app.rows && app.rows.length) { const isDb = window.location.href.includes('/dragonballs/'); const targetRow = isDb ? app.rows[0] : app.rows[app.rows.length - 1]; if (targetRow && targetRow.perks && targetRow.perks.length) { const targetPerk = isDb ? targetRow.perks[0] : targetRow.perks[targetRow.perks.length - 1]; if (targetPerk) { if (!targetPerk.cost || !Array.isArray(targetPerk.cost)) targetPerk.cost = []; const exists = targetPerk.cost.some(c => c && c.name && c.name.toLowerCase() === "${pointName.replace(/"/g, '\\"').toLowerCase()}"); if (!exists) { targetPerk.cost.push({ name: "${pointName.replace(/"/g, '\\"')}", value: 0, show: false }); } } } } } catch (e) {}`;
+        (document.head || document.documentElement).appendChild(script);
+        script.remove();
+        return;
+      } catch (e) { }
+    }
   } catch (e) { }
 }
 

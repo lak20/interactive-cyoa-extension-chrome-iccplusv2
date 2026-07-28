@@ -181,6 +181,7 @@ function pageScript(extId) {
                   firstPerk.cost[0] = { name: "Points", value: 0, show: false };
                   firstPerk.cost[1] = { name: "Mutation Points", value: 0, show: false };
                   firstPerk.cost[2] = { name: "Z-Coins", value: 0, show: false };
+                  firstPerk.cost[3] = { name: "Embers", value: 0, show: false };
                   window.__VUE3_ICC_DUMMY_PERK_INJECTED__ = true;
                   return;
                 }
@@ -218,6 +219,11 @@ function pageScript(extId) {
                 },
                 {
                   name: "Z-Coins",
+                  value: 0,
+                  show: false
+                },
+                {
+                  name: "Embers",
                   value: 0,
                   show: false
                 }

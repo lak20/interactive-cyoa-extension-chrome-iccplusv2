@@ -16,6 +16,25 @@ try {
     }
     injectMainWorld();
 
+    window.addEventListener('message', (event) => {
+      if (event.source !== window) return;
+      if (event.data && event.data.source === 'CYOA_MAIN_WORLD' && event.data.type === 'CYOA_VUE3_STATE') {
+        try {
+          browser.runtime.sendMessage({ type: 'activate' });
+        } catch (e) { }
+        if (event.data.points && event.data.points.length > 0) {
+          try {
+            browser.runtime.sendMessage({ type: 'points', points: event.data.points });
+          } catch (e) { }
+        }
+        if (event.data.rows && event.data.rows.length > 0) {
+          try {
+            browser.runtime.sendMessage({ type: 'rows', rows: event.data.rows });
+          } catch (e) { }
+        }
+      }
+    });
+
     const attachInterval = setInterval(() => {
       try {
         let app = undefined;

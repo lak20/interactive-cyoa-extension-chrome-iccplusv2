@@ -19,6 +19,18 @@
           <button id="toggle-requirements-button" title="this cannot be undone">Toggle All Requirements</button>
         </div>
         <div id="points-container"></div>
+        <div id="add-point-container"
+          style="display: none; margin: 4px 0; flex-direction: column; align-items: flex-start; gap: 4px;">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <input type="text" id="custom-point-name-input" placeholder="Custom point name..."
+              style="width: 140px; font-size: 12px; padding: 2px 4px;" />
+            <button id="add-custom-point-button" style="font-size: 11px; cursor: pointer; padding: 2px 6px;">+ Add
+              Point</button>
+          </div>
+          <div class="vue3-note" style="font-size: 10px; color: #666; max-width: 260px; line-height: 1.2;">
+            Note: Point names are case sensitive. If unsure, copy them exactly from the game UI without the :.
+          </div>
+        </div>
       </div>
       <div class="action-group">
         <h3>Per-Row Actions</h3>

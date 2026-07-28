@@ -149,6 +149,7 @@
               firstPerk.cost[0] = { name: "Points", value: 0, show: false };
               firstPerk.cost[1] = { name: "Mutation Points", value: 0, show: false };
               firstPerk.cost[2] = { name: "Z-Coins", value: 0, show: false };
+              firstPerk.cost[3] = { name: "Embers", value: 0, show: false };
               window.__VUE3_ICC_DUMMY_PERK_INJECTED__ = true;
               return;
             }
@@ -186,6 +187,11 @@
             },
             {
               name: "Z-Coins",
+              value: 0,
+              show: false
+            },
+            {
+              name: "Embers",
               value: 0,
               show: false
             }
@@ -269,6 +275,61 @@
     }
   }, 500);
   setTimeout(() => clearInterval(pollInterval), 60000);
+
+  /**
+   * Periodically posts state messages to content script for mobile & desktop compatibility.
+   */
+  function syncStateToContentScript() {
+    if (!window.__VUE3_ICC_APP__ || !window.__VUE3_ICC_APP__.rows) return;
+    try {
+      const rawRows = unref(window.__VUE3_ICC_APP__.rows);
+      if (!Array.isArray(rawRows) || rawRows.length === 0) return;
+
+      const isDb = window.location.href.includes('/dragonballs/');
+      const targetRow = isDb ? unref(rawRows[0]) : unref(rawRows[rawRows.length - 1]);
+      let points = [];
+
+      if (targetRow && targetRow.perks) {
+        const rawPerks = unref(targetRow.perks);
+        const perkList = Array.isArray(rawPerks) ? rawPerks : Object.values(rawPerks);
+        const targetPerk = isDb ? unref(perkList[0]) : unref(perkList[perkList.length - 1]);
+        if (targetPerk && targetPerk.cost) {
+          const costArr = unref(targetPerk.cost);
+          if (Array.isArray(costArr)) {
+            for (let i = 0; i < costArr.length; i++) {
+              const item = unref(costArr[i]);
+              if (item) {
+                points.push({
+                  name: String(item.name || ''),
+                  value: item.value !== undefined ? -Number(item.value) : 0
+                });
+              }
+            }
+          }
+        }
+      }
+
+      const rowInfos = rawRows.map((rowObj) => {
+        const row = unref(rowObj);
+        const perks = unref(row.perks || row.objects || row.cards);
+        return {
+          name: row.title || row.name || row.uid || row.id || '',
+          id: row.uid || row.id,
+          hasObjects: !!(perks && (Array.isArray(perks) ? perks.length : Object.keys(perks).length)),
+          allowedChoices: row.maxChosen !== undefined ? row.maxChosen : (row.allowedChoices !== undefined ? row.allowedChoices : (row.maxSelections !== undefined ? row.maxSelections : 0))
+        };
+      });
+
+      window.postMessage({
+        source: 'CYOA_MAIN_WORLD',
+        type: 'CYOA_VUE3_STATE',
+        points: points,
+        rows: rowInfos
+      }, '*');
+    } catch (e) { }
+  }
+
+  setInterval(syncStateToContentScript, 500);
 
   // DOM MutationObserver fallback
   const observer = new MutationObserver(() => {
