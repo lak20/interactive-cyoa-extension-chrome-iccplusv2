@@ -162,9 +162,9 @@ try {
               const pts = [];
               for (let i = 0; i < len; i++) {
                 const item = costArr[i];
-                if (item) {
+                if (item && item.name && String(item.name).trim() !== '' && String(item.name) !== 'undefined') {
                   pts.push({
-                    name: String(item.name || ''),
+                    name: String(item.name),
                     value: item.value !== undefined ? -Number(item.value) : 0
                   });
                 }
@@ -176,10 +176,11 @@ try {
       }
 
       if (!points && app && app.pointTypes) {
-        points = Array.prototype.map.call(app.pointTypes, (point) => ({
-          name: point.name,
-          value: point.startingSum
-        }));
+        const legacyPts = Array.prototype.map.call(app.pointTypes, (point) => ({
+          name: point ? point.name : undefined,
+          value: point ? point.startingSum : 0
+        })).filter((p) => p && p.name && p.name !== 'undefined');
+        if (legacyPts.length > 0) points = legacyPts;
       } else if (!points) {
         // try window.game.state.points
         try {

@@ -298,9 +298,9 @@
           if (Array.isArray(costArr)) {
             for (let i = 0; i < costArr.length; i++) {
               const item = unref(costArr[i]);
-              if (item) {
+              if (item && item.name && String(item.name).trim() !== '' && String(item.name) !== 'undefined') {
                 points.push({
-                  name: String(item.name || ''),
+                  name: String(item.name),
                   value: item.value !== undefined ? -Number(item.value) : 0
                 });
               }

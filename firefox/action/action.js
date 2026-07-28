@@ -483,6 +483,36 @@ function updatePoints(points, frameId = 0) {
 function updatePoint(index, value) {
   try {
     (() => {
+      let vue3App = undefined;
+      try {
+        vue3App = window.wrappedJSObject.__VUE3_ICC_APP__ || window.__VUE3_ICC_APP__;
+      } catch (e) { }
+
+      if (vue3App || window.__VUE3_ICC_APP__) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = `try {
+            const app = window.__VUE3_ICC_APP__;
+            if (app && app.rows && app.rows.length) {
+              const isDb = window.location.href.includes('/dragonballs/');
+              const targetRow = isDb ? app.rows[0] : app.rows[app.rows.length - 1];
+              if (targetRow && targetRow.perks && targetRow.perks.length) {
+                const targetPerk = isDb ? targetRow.perks[0] : targetRow.perks[targetRow.perks.length - 1];
+                if (targetPerk) {
+                  if (!targetPerk.cost || !Array.isArray(targetPerk.cost)) targetPerk.cost = [];
+                  if (targetPerk.cost[${index}]) {
+                    targetPerk.cost[${index}].value = -(${value});
+                  }
+                }
+              }
+            }
+          } catch (e) {}`;
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+        return;
+      }
+
       let app = undefined;
       let pointName = undefined;
       try {
@@ -517,34 +547,6 @@ function updatePoint(index, value) {
         if (!app) {
           app = window.debugApp;
         }
-      }
-      let vue3App = undefined;
-      try {
-        vue3App = window.wrappedJSObject.__VUE3_ICC_APP__ || window.__VUE3_ICC_APP__;
-      } catch (e) { }
-
-      if (vue3App && vue3App.rows && vue3App.rows.length > 0) {
-        try {
-          const rows = vue3App.rows;
-          const isDb = window.location.href.includes('/dragonballs/');
-          const targetRow = isDb ? rows[0] : rows[rows.length - 1];
-          if (targetRow && targetRow.perks && targetRow.perks.length > 0) {
-            const perks = targetRow.perks;
-            const targetPerk = isDb ? perks[0] : perks[perks.length - 1];
-            if (targetPerk && targetPerk.cost && targetPerk.cost[index]) {
-              targetPerk.cost[index].value = -value;
-              return;
-            }
-          }
-        } catch (e) { }
-
-        try {
-          const script = document.createElement('script');
-          script.textContent = `try { const app = window.__VUE3_ICC_APP__; if (app && app.rows && app.rows.length) { const isDb = window.location.href.includes('/dragonballs/'); const targetRow = isDb ? app.rows[0] : app.rows[app.rows.length - 1]; if (targetRow && targetRow.perks && targetRow.perks.length) { const targetPerk = isDb ? targetRow.perks[0] : targetRow.perks[targetRow.perks.length - 1]; if (targetPerk && targetPerk.cost && targetPerk.cost[${index}]) { targetPerk.cost[${index}].value = -(${value}); } } } } catch (e) {}`;
-          (document.head || document.documentElement).appendChild(script);
-          script.remove();
-          return;
-        } catch (e) { }
       }
 
       if (!app) {
