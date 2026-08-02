@@ -277,6 +277,27 @@ function createRowActionButtons(row, index, frameId) {
     });
   };
 
+  const makeButtonsRepeatableBtn = document.createElement('button');
+  makeButtonsRepeatableBtn.textContent = 'Buttons are now repeatable';
+  makeButtonsRepeatableBtn.onclick = () => {
+    getCurrentTab().then((tab) => {
+      const target = { tabId: tab.id };
+      if (frameId !== undefined) {
+        target.frameIds = [frameId];
+      }
+      chrome.scripting.executeScript({
+        target: target,
+        func: makeButtonsRepeatable,
+        args: [index],
+        world: chrome.scripting.ExecutionWorld.MAIN
+      });
+    });
+  };
+
+  // Create third container
+  const thirdContainer = document.createElement('div');
+  thirdContainer.className = 'row-button-container';
+
   // Add buttons to left container
   leftContainer.appendChild(removeRowLimitsBtn);
   leftContainer.appendChild(removeRequirementsBtn);
@@ -285,11 +306,15 @@ function createRowActionButtons(row, index, frameId) {
   rightContainer.appendChild(removeRandomnessBtn);
   rightContainer.appendChild(toggleRequirementsBtn);
 
+  // Add buttons to third container
+  thirdContainer.appendChild(makeButtonsRepeatableBtn);
+
   // Add all elements to main container
   container.appendChild(rowLimitInput);
   container.appendChild(rowNameElem);
   container.appendChild(leftContainer);
   container.appendChild(rightContainer);
+  container.appendChild(thirdContainer);
   return container;
 }
 
@@ -938,6 +963,115 @@ document.getElementById('show-requirements-button').onclick = async () => {
     });
   } catch (e) { }
 };
+
+document.getElementById('make-buttons-repeatable-button').onclick = async () => {
+  try {
+    await chrome.scripting.executeScript({
+      target: {
+        tabId: (await getCurrentTab()).id,
+        allFrames: true
+      },
+      func: makeButtonsRepeatable,
+      world: chrome.scripting.ExecutionWorld.MAIN
+    });
+  } catch (e) { }
+};
+
+function makeButtonsRepeatable(rowIndex = null) {
+  try {
+    (() => {
+      let app = undefined;
+      try {
+        // try vue
+        app = document.querySelector('#app').__vue__.$store.state.app;
+      } catch (e) { }
+      let isNuxt = false;
+      if (!app) {
+        try {
+          // try nuxt (ltouroumov version)
+          app = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia.state._rawValue.project.store._value.file.data;
+          isNuxt = true;
+        } catch (e) { }
+      }
+      if (!app) {
+        // try svelte
+        app = window.debugApp;
+      }
+      if (!app) {
+        // try vue 3 custom
+        try {
+          app = window.__VUE3_ICC_APP__;
+        } catch (e) { }
+      }
+
+      if (app && app.rows) {
+        function allThings(func) {
+          if (rowIndex !== null) {
+            // Handle single row
+            if (app.rows[rowIndex]) {
+              allObjects(app.rows[rowIndex], func);
+            }
+          } else {
+            // Handle all rows
+            Array.prototype.forEach.call(app.rows, (row) => allObjects(row, func));
+          }
+        }
+
+        function allObjects(row, func) {
+          func(row);
+          const items = row.perks || row.objects || row.cards;
+          if (items && items.length) {
+            Array.prototype.forEach.call(items, (child) => allObjects(child, func));
+          }
+        }
+
+        allThings((obj) => {
+          if (obj && obj.onlyIfNoChoices === true) {
+            obj.onlyIfNoChoices = false;
+          }
+        });
+      } else {
+        // try window.game.data.sections
+        try {
+          const sections = window.game?.data?.sections;
+          if (sections) {
+            const process = (section) => {
+              if (section && section.onlyIfNoChoices === true) {
+                section.onlyIfNoChoices = false;
+              }
+              const items = section.cards || section.perks || section.objects;
+              if (items && items.length) {
+                Array.prototype.forEach.call(items, (item) => {
+                  if (item && item.onlyIfNoChoices === true) {
+                    item.onlyIfNoChoices = false;
+                  }
+                });
+              }
+            };
+            if (rowIndex !== null) {
+              if (sections[rowIndex]) {
+                process(sections[rowIndex]);
+              }
+            } else {
+              Array.prototype.forEach.call(sections, process);
+            }
+            try {
+              window.game.updateAfterToggle?.();
+            } catch (e) { }
+          }
+        } catch (e) { }
+      }
+      if (isNuxt) {
+        try {
+          const script = document.createElement('script');
+          script.textContent = 'try { const s = document.getElementById("__nuxt").__vue_app__.$nuxt.$pinia._s.get("project"); if (s && s.store && s.store.file && s.store.file.data) { const raw = s.store; const d = raw.file.data; const newData = Object.assign({}, d, { rows: (d.rows || []).slice(), pointTypes: (d.pointTypes || []).slice() }); const newFile = Object.assign({}, raw.file, { data: newData }); s.store = Object.assign({}, raw, { file: newFile }); } } catch (e) {}';
+          (document.head || document.documentElement).appendChild(script);
+          script.remove();
+        } catch (e) { }
+      }
+    })();
+  } catch (e) { }
+}
 
 function toggleAllRequirements(rowIndex = null) {
   try {

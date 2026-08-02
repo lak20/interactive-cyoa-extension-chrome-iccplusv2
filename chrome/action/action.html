@@ -11,12 +11,15 @@
       <div class="sticky-section">
         <div class="action-group">
           <h3>Global Actions</h3>
-          <button id="remove-row-limits-button" title="this cannot be undone">Remove All Row Limits</button>
-          <button id="remove-requirements-button"
-            title="this will break some kinds of formatting (this cannot be undone)">Remove All Requirements</button>
-          <button id="remove-randomness-button" title="this cannot be undone">Remove All Randomness</button>
-          <button id="show-requirements-button" title="this cannot be undone">Show All Requirements</button>
-          <button id="toggle-requirements-button" title="this cannot be undone">Toggle All Requirements</button>
+          <div class="global-buttons-container">
+            <button id="remove-row-limits-button" title="this cannot be undone">Remove All Row Limits</button>
+            <button id="remove-requirements-button"
+              title="this will break some kinds of formatting (this cannot be undone)">Remove All Requirements</button>
+            <button id="remove-randomness-button" title="this cannot be undone">Remove All Randomness</button>
+            <button id="show-requirements-button" title="this cannot be undone">Show All Requirements</button>
+            <button id="toggle-requirements-button" title="this cannot be undone">Toggle All Requirements</button>
+            <button id="make-buttons-repeatable-button" title="this cannot be undone">Buttons are now repeatable</button>
+          </div>
         </div>
         <div id="points-container"></div>
         <div id="add-point-container"
@@ -28,7 +31,7 @@
               Point</button>
           </div>
           <div class="vue3-note" style="font-size: 10px; color: #666; max-width: 260px; line-height: 1.2;">
-            Note: Point names are case sensitive. If unsure, copy them exactly from the game UI without the :.
+            Note: Point names are case sensitive. If unsure, copy them exactly from the game UI without the :
           </div>
         </div>
       </div>
