@@ -1,10 +1,23 @@
+/* ==========================================================================
+   Theme Variables
+   ========================================================================== */
+
+:root {
+  --bg-color: rgb(220, 230, 235);
+  --border-color: #ccc;
+}
+
+/* ==========================================================================
+   Base & Layout
+   ========================================================================== */
+
 body {
   width: 100%;
   min-height: 300px;
   margin: 0;
   padding: 8px;
   box-sizing: border-box;
-  background-color: #fafafa;
+  background-color: var(--bg-color);
 }
 
 .container {
@@ -12,29 +25,6 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-}
-
-.point {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.point-button-container {
-  display: flex;
-  flex-direction: row;
-  gap: 2px;
-}
-
-.name,
-.value,
-#remove-row-limits-button {
-  inline-size: max-content;
-}
-
-.value {
-  width: 50px;
 }
 
 #actions-container {
@@ -46,91 +36,17 @@ body {
   max-width: 600px;
 }
 
-#points-container {
-  padding: 2px;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  margin: 2px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: max-content;
-}
-
 .sticky-section {
   position: sticky !important;
   left: 10px !important;
-}
-
-.action-group {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 2px;
-  min-width: max-content;
-  padding: 1px;
-  margin: 1px;
-}
-
-.row-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  width: 100%;
-  padding: 2px;
-  margin: 2px 0;
-  gap: 1px;
-}
-
-.row-button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.row-name {
-  width: auto;
-  font-weight: bold;
-  padding-right: 2px;
-  text-align: left;
-}
-
-.global-buttons-container {
-  display: grid;
-  grid-template-rows: repeat(3, auto);
-  grid-auto-flow: column;
-  gap: 2px;
-}
-
-.global-buttons-container button {
-  width: 100%;
-  inline-size: auto;
-}
-
-.action-group h3 {
-  margin: 0;
-  padding: 1px 0;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.action-group button {
-  border-bottom: 1px solid #eee;
-  border-radius: 0;
-}
-
-.point {
-  border-bottom: 1px solid #eee;
 }
 
 button {
   inline-size: max-content;
   padding: 2px 2px;
   border-radius: 2px;
-  border: 1px solid #ccc;
-  background: #f5f5f5;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
   cursor: pointer;
 }
 
@@ -150,6 +66,94 @@ button:active {
   transition: transform 0.1s;
 }
 
+/* ==========================================================================
+   Global Actions
+   ========================================================================== */
+
+.action-group {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 2px;
+  min-width: max-content;
+  padding: 1px;
+  margin: 1px;
+}
+
+.action-group h3 {
+  margin: 0;
+  padding: 1px 0;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.action-group button {
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.global-buttons-container {
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  gap: 2px;
+}
+
+.global-buttons-container button {
+  width: 100%;
+  inline-size: auto;
+}
+
+/* ==========================================================================
+   Points Container
+   ========================================================================== */
+
+#points-container {
+  padding: 2px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin: 2px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: max-content;
+}
+
+.point {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.point-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+
+.name {
+  inline-size: max-content;
+}
+
+.value {
+  inline-size: max-content;
+  width: 50px;
+  background: var(--bg-color);
+}
+
+/* ==========================================================================
+   Per-Row Actions
+   ========================================================================== */
+
+.action-group h3.row-actions-header,
+.row-actions-header {
+  text-align: left;
+}
+
 .row-actions {
   display: flex;
   flex-direction: row;
@@ -157,37 +161,40 @@ button:active {
   justify-content: flex-start;
   gap: 1px;
   padding: 1px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   min-width: max-content;
-  background: #fff;
+  background: var(--bg-color);
 }
 
 .row-actions:hover {
   background: #f8f8f8;
 }
 
+.row-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .row-name {
+  width: auto;
   min-width: fit-content;
+  font-weight: bold;
+  padding-right: 2px;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.no-rows-message {
-  padding: 1px;
-  font-style: italic;
-  text-align: center;
-  width: 100%;
-}
-
 .row-limit-input {
   width: 45px;
   padding: 1px 2px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 2px;
   text-align: center;
   font-size: 12px;
-  background: #fff;
+  background: var(--bg-color);
   margin-right: 4px;
   -moz-appearance: textfield;
 }
@@ -196,4 +203,11 @@ button:active {
 .row-limit-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.no-rows-message {
+  padding: 1px;
+  font-style: italic;
+  text-align: center;
+  width: 100%;
 }
