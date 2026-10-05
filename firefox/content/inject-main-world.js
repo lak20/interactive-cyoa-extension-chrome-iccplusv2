@@ -2,7 +2,7 @@
   if (window.__VUE3_ICC_INJECTED__) return;
   window.__VUE3_ICC_INJECTED__ = true;
 
-  console.log('[CYOA Extension] Vue 3 main-world VNode scanner initialized.');
+  #console.log('[CYOA Extension] Vue 3 main-world VNode scanner initialized.');
 
   /**
    * Safely unwraps Vue 3 RefImpl objects or returns the value directly.
